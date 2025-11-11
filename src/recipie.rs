@@ -1,15 +1,7 @@
-use crate::ingredients::Ingredient;
+use crate::ingredients::{IngredientSelector};
+use serde::{Deserialize, Serialize};
 
-struct Recipie {
-    ingredients: Vec<Ingredient>
-}
-
-pub struct RecipieStore {
-
-}
-
-impl RecipieStore {
-    pub fn new() -> RecipieStore {
-        RecipieStore {  }
-    }
+#[derive(Serialize, Deserialize)]
+pub struct Recipie {
+    ingredients: Vec<IngredientSelector>
 }

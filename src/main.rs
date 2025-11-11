@@ -3,11 +3,12 @@
 
 mod ingredients;
 mod recipie;
+mod recipie_store;
 
 use eframe::egui;
 
 use crate::ingredients::IngredientStore;
-use crate::recipie::RecipieStore;
+use crate::recipie_store::RecipieStore;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
@@ -44,7 +45,7 @@ impl Default for MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("My egui Application");
+            ui.heading("Drink Solver");
             ui.horizontal(|ui| {
                 let name_label = ui.label("Your name: ");
                 ui.text_edit_singleline(&mut self.name)
