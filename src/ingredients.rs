@@ -1,5 +1,5 @@
 use uuid::Uuid;
-use std::{collections::{HashMap, HashSet}, hash::Hash};
+use std::{collections::{HashMap, HashSet}, fmt, hash::Hash};
 use serde::{Serialize, Deserialize};
 
 use crate::ingredients;
@@ -12,25 +12,37 @@ pub enum Quality {
     Any
 }
 
+impl fmt::Display for Quality {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let val = match self {
+            Quality::Low => "Low",
+            Quality::Medium => "Medium",
+            Quality::High => "High",
+            Quality::Any => "Any",
+        };
+        write!(f, "{}", val)
+    }
+}
+
 // Tag for types of ingredients. e.g. "Gin" or "sweet"
 #[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct IngredientTag {
-    value: String
+    pub value: String
 }
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Ingredient {
-    name: String,
-    quality: Quality,
-    tags: Vec<IngredientTag>
+    pub name: String,
+    pub quality: Quality,
+    pub tags: Vec<IngredientTag>
 }
 
 // Struct for finding ingredients in an ingredient store
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct IngredientSelector {
-    name: Option<String>,
-    quality: Option<Quality>,
-    tags: Option<Vec<IngredientTag>>
+    pub name: Option<String>,
+    pub quality: Option<Quality>,
+    pub tags: Option<Vec<IngredientTag>>
 }
 
 // A store of ingredients
@@ -60,7 +72,14 @@ impl IngredientStore {
             }
         }).filter(|i| {
             match &selector.tags {
-                Some(tags) => true,
+                Some(tags) => {
+                    for tag in tags {
+                        if !i.tags.contains(tag) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
                 None => true
             }
         }).cloned().collect()
@@ -68,6 +87,14 @@ impl IngredientStore {
 
     pub fn register_ingredient(&mut self, ingredient: Ingredient) {
         self.ingredient_map.insert(ingredient);
+    }
+
+    pub fn get_ingredient_names(&self) -> Vec<String> {
+        return self.ingredient_map.iter().map(|i| i.name.clone()).collect()
+    }
+
+    pub fn get_ingredient(&self, name: &String) -> Option<Ingredient> {
+        self.ingredient_map.iter().find(|&i| &i.name == name).cloned()
     }
 }
 

@@ -54,14 +54,59 @@ impl RecipieStore {
             _ => false
         }
     }
+
+    pub fn register_recipie(&mut self, recipie: Recipie) -> uuid::Uuid {
+        let id = uuid::Uuid::new_v4();
+        self.recipies.insert(id, recipie);
+        id
+    }
+
+    pub fn get_recipie_entries(&self) -> Vec<(uuid::Uuid, Recipie)> {
+        self.recipies.iter().map(|(u, r)| (u.clone(), r.clone())).collect()
+    }
+
+    pub fn get_recipie(&self, id: uuid::Uuid) -> Option<Recipie> {
+        match self.recipies.get(&id) {
+            Some(r) => Some(r.clone()),
+            None => None,
+        }
+    }
+
+    pub fn get_recipie_mut(&mut self, id: uuid::Uuid) -> Option<&mut Recipie> {
+        self.recipies.get_mut(&id)
+    }
+
+    pub fn get_recipies(&self) -> Vec<Recipie> {
+        self.recipies.values().cloned().collect()
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::ingredients::Ingredient;
+
     use super::*;
 
     #[test]
-    fn vacuous() {
-        assert!(true);
+    fn test_recipie_mut() {
+        let mut store = RecipieStore::default();
+        let r = Recipie::default();
+        let id = store.register_recipie(r.clone());
+        {
+            let mut_r_opt = store.get_recipie_mut(id);
+            assert!(mut_r_opt.is_some());
+            let mut_r = mut_r_opt.unwrap();
+            mut_r.name = "New Name".into();
+            mut_r.short_description = "New Short Description".into();
+            mut_r.description = "New Description".into();
+            mut_r.notes = "New Notes".into();
+        }
+        let new_r_opt = store.get_recipie(id);
+        assert!(new_r_opt.is_some());
+        let new_r = new_r_opt.unwrap();
+        assert_ne!(r.name, new_r.name);
+        assert_ne!(r.description, new_r.description);
+        assert_ne!(r.short_description, new_r.short_description);
+        assert_ne!(r.notes, new_r.notes);
     }
 }
