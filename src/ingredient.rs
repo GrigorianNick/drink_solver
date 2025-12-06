@@ -2,7 +2,7 @@ use uuid::Uuid;
 use std::{collections::{HashMap, HashSet}, fmt, hash::Hash};
 use serde::{Serialize, Deserialize};
 
-use crate::ingredients;
+use crate::ingredient;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum Quality {
@@ -25,12 +25,12 @@ impl fmt::Display for Quality {
 }
 
 // Tag for types of ingredients. e.g. "Gin" or "sweet"
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct IngredientTag {
     pub value: String
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Ingredient {
     pub name: String,
     pub quality: Quality,

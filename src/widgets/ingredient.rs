@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use egui::Widget;
 
-use crate::ingredients::IngredientStore;
+use crate::ingredient::IngredientStore;
 
 pub struct IngredientWidget {
     ingredient_store: Rc<RefCell<IngredientStore>>,

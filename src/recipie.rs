@@ -1,6 +1,6 @@
 use core::fmt;
 
-use crate::ingredients::{IngredientSelector};
+use crate::ingredient::{IngredientSelector};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]

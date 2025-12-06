@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use egui::Widget;
 
-use crate::{recipie_builder::RecipieBuilder, recipie_store::{self, RecipieStore}};
+use crate::{builder::Builder, recipie_builder::RecipieBuilder, recipie_store::{self, RecipieStore}, store::Store};
 
 #[derive(Clone)]
 pub struct CreateRecipieWidget {
@@ -18,10 +18,17 @@ impl CreateRecipieWidget {
 
 impl Widget for &mut CreateRecipieWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        let r = ui.text_edit_singleline(&mut self.builder.name);
-        if ui.button("Save").clicked() {
-            self.recipie_store.borrow_mut().register_recipie(self.builder.build());
-        }
-        r
+        ui.text_edit_singleline(&mut self.builder.name);
+        ui.separator();
+        ui.text_edit_singleline(&mut self.builder.short_description);
+        ui.text_edit_multiline(&mut self.builder.description);
+        ui.horizontal( |ui| {
+            if ui.button("Save").clicked() {
+                self.recipie_store.borrow_mut().register(self.builder.build());
+            }
+            if ui.button("Reset").clicked() {
+                self.builder = RecipieBuilder::new();
+            }
+        }).response
     }
 }

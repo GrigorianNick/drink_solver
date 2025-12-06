@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{ingredients::{Ingredient, IngredientSelector, IngredientStore, IngredientTag, Quality}, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}}};
+use crate::{ingredient::{Ingredient, IngredientSelector, IngredientStore, IngredientTag, Quality}, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}}};
 use super::recipie::RecipieWidget;
 
 #[derive(PartialEq, Eq)]
@@ -25,12 +25,12 @@ impl Default for MyApp {
     fn default() -> Self {
         let mut recipie_store = Rc::new(RefCell::new(RecipieStore::default()));
         let mut ingredient_store = Rc::new(RefCell::new(IngredientStore::new()));
-        let gin = Ingredient { name: "Roku".into(), quality: crate::ingredients::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}] };
-        let gin2 = Ingredient { name: "Virago".into(), quality: crate::ingredients::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}] };
-        let rum = Ingredient { name: "Kraken".into(), quality: crate::ingredients::Quality::High, tags: vec![IngredientTag{ value: "Rum".into()}] };
-        let simple_syrup = Ingredient { name: "Simple Syrup".into(), quality: crate::ingredients::Quality::Any, tags: vec![IngredientTag{ value: "Sweet".into()},IngredientTag{ value: "Sugary".into()}]};
-        let tonic = Ingredient { name: "Tonic water".into(), quality: crate::ingredients::Quality::Any, tags: vec![IngredientTag{ value: "Fizzy".into()}]};
-        let cola = Ingredient { name: "Coca-Cola".into(), quality: crate::ingredients::Quality::Any, tags: vec![IngredientTag{ value: "Cola".into()}]};
+        let gin = Ingredient { name: "Roku".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}] };
+        let gin2 = Ingredient { name: "Virago".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}] };
+        let rum = Ingredient { name: "Kraken".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Rum".into()}] };
+        let simple_syrup = Ingredient { name: "Simple Syrup".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Sweet".into()},IngredientTag{ value: "Sugary".into()}]};
+        let tonic = Ingredient { name: "Tonic water".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Fizzy".into()}]};
+        let cola = Ingredient { name: "Coca-Cola".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Cola".into()}]};
         ingredient_store.borrow_mut().register_ingredient(gin);
         ingredient_store.borrow_mut().register_ingredient(gin2);
         ingredient_store.borrow_mut().register_ingredient(rum);
@@ -73,8 +73,8 @@ impl Default for MyApp {
             instructions: vec!["Put in ice".into(), "Put in rum".into(), "Top with coke".into()]
             };
 
-        recipie_store.borrow_mut().register_recipie(gin_and_tonic);
-        recipie_store.borrow_mut().register_recipie(rum_and_coke);
+        recipie_store.borrow_mut().register(gin_and_tonic);
+        recipie_store.borrow_mut().register(rum_and_coke);
 
         Self {
             ingredient_store: ingredient_store.clone(),

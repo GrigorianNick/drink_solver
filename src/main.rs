@@ -1,15 +1,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 #![allow(rustdoc::missing_crate_level_docs)] // it's an example
 
-mod ingredients;
+mod ingredient;
 mod recipie;
 mod recipie_builder;
 mod recipie_store;
 mod widgets;
+mod ingredient_builder;
+mod builder;
+mod store;
 
 use eframe::egui;
 
-use crate::ingredients::IngredientStore;
+use crate::ingredient::IngredientStore;
 use crate::recipie_store::RecipieStore;
 
 fn main() -> eframe::Result {

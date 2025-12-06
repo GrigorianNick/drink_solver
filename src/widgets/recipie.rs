@@ -1,8 +1,8 @@
-use egui::{Button, Layout, Widget, containers::menu::menu_style};
+use egui::{Button, IntoAtoms, Layout, Widget, containers::menu::menu_style};
 
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{ingredients::IngredientStore, recipie::Component, recipie_store::{self, RecipieStore}, widgets::ingredient};
+use crate::{ingredient::IngredientStore, recipie::Component, recipie_store::{self, RecipieStore}, widgets::ingredient};
 
 pub struct RecipieWidget {
     recipie_store: Rc<RefCell<RecipieStore>>,
@@ -37,7 +37,9 @@ impl Widget for &mut RecipieWidget {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Max).with_cross_justify(true), |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.vertical(|ui| {
-                    for (id, recipie) in self.recipie_store.borrow().get_recipie_entries() {
+                    let mut recipies = self.recipie_store.borrow().get_recipie_entries();
+                    recipies.sort_by_key(|r| r.1.name.clone().to_ascii_lowercase());
+                    for (id, recipie) in recipies {
                         ui.selectable_value(&mut self.selected_recipie, id, recipie.name);
                     }
                 })
@@ -100,7 +102,9 @@ impl Widget for &mut ComponentWidget {
                 ui.label(ingredients[0].name.clone());
             } else {
                 egui::containers::ComboBox::from_id_salt(self.id).selected_text(self.selected.clone()).show_ui(ui, |ui| {
-                    for ingredient in self.ingredient_store.borrow().select(&self.component.ingredient) {
+                    let mut ingredients = self.ingredient_store.borrow().select(&self.component.ingredient);
+                    ingredients.sort_by_key(|i| i.name.clone().to_ascii_lowercase());
+                    for ingredient in ingredients {
                         ui.selectable_value(&mut self.selected, ingredient.name.clone(), ingredient.name);
                     }
                 });
