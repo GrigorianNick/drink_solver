@@ -6,6 +6,8 @@ mod recipie;
 mod recipie_builder;
 mod recipie_store;
 mod widgets;
+mod builder;
+mod ingredient_builder;
 
 use eframe::egui;
 
