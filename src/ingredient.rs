@@ -1,16 +1,28 @@
+use strum::{EnumIter, EnumString};
 use uuid::Uuid;
-use std::{collections::{HashMap, HashSet}, fmt, hash::Hash};
+use std::{collections::{HashMap, HashSet}, fmt, hash::Hash, str::FromStr};
 use serde::{Serialize, Deserialize};
 
 use crate::ingredient;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Hash, EnumString, EnumIter)]
 pub enum Quality {
     Low,
     Medium,
     High,
+    #[default]
     Any
 }
+
+/*impl FromStr for Quality {
+    type Err;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Low" => Ok(Quality::Low),
+        }
+    }
+}*/
 
 impl fmt::Display for Quality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

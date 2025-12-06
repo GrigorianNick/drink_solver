@@ -9,6 +9,8 @@ mod widgets;
 mod ingredient_builder;
 mod builder;
 mod store;
+mod builder;
+mod ingredient_builder;
 
 use eframe::egui;
 

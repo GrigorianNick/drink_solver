@@ -80,8 +80,8 @@ impl Default for MyApp {
             ingredient_store: ingredient_store.clone(),
             recipie_store: recipie_store.clone(),
             recipie_widget: RecipieWidget::new(recipie_store.clone(), ingredient_store.clone()),
-            ingredient_widget: IngredientWidget::new(ingredient_store),
-            create_ingredient_widget: CreateIngredientWidget::default(),
+            ingredient_widget: IngredientWidget::new(ingredient_store.clone()),
+            create_ingredient_widget: CreateIngredientWidget::new(ingredient_store.clone()),
             create_recipie_widget: CreateRecipieWidget::new(recipie_store.clone()),
             active_tab: ActiveTab::Inventory
         }
