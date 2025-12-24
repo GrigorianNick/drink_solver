@@ -9,13 +9,11 @@ mod widgets;
 mod ingredient_builder;
 mod builder;
 mod store;
-mod builder;
-mod ingredient_builder;
+mod ingredient_store;
+mod ingredient_selector_builder;
+mod component_builder;
 
 use eframe::egui;
-
-use crate::ingredient::IngredientStore;
-use crate::recipie_store::RecipieStore;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {

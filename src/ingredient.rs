@@ -1,9 +1,9 @@
 use strum::{EnumIter, EnumString};
 use uuid::Uuid;
-use std::{collections::{HashMap, HashSet}, fmt, hash::Hash, str::FromStr};
+use std::{collections::{HashMap, HashSet}, fmt, hash::Hash, path::PathBuf, str::FromStr};
 use serde::{Serialize, Deserialize};
 
-use crate::ingredient;
+use crate::{ingredient, store::Store};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Hash, EnumString, EnumIter)]
 pub enum Quality {
@@ -49,103 +49,30 @@ pub struct Ingredient {
     pub tags: Vec<IngredientTag>
 }
 
-// Struct for finding ingredients in an ingredient store
-#[derive(Serialize, Deserialize, Clone)]
-pub struct IngredientSelector {
-    pub name: Option<String>,
-    pub quality: Option<Quality>,
-    pub tags: Option<Vec<IngredientTag>>
-}
-
-// A store of ingredients
-#[derive(Serialize, Deserialize, Default)]
-pub struct IngredientStore {
-    ingredient_map: HashSet<Ingredient>,
-    ingredient_tags: HashSet<IngredientTag>
-}
-
-impl IngredientStore {
-    pub fn new() -> IngredientStore
-    {
-        IngredientStore::default()
-    }
-
-    pub fn select(&self, selector: &IngredientSelector) -> Vec<Ingredient>
-    {
-        self.ingredient_map.iter().filter(|i| {
-            match &selector.name {
-                Some(n) => *n == i.name,
-                None => true
-            }
-        }).filter(|i| {
-            match selector.quality {
-                Some(q) => q == Quality::Any || i.quality == Quality::Any || q == i.quality,
-                None => true
-            }
-        }).filter(|i| {
-            match &selector.tags {
-                Some(tags) => {
-                    for tag in tags {
-                        if !i.tags.contains(tag) {
-                            return false;
-                        }
-                    }
-                    return true;
-                },
-                None => true
-            }
-        }).cloned().collect()
-    }
-
-    pub fn register_ingredient(&mut self, ingredient: Ingredient) {
-        self.ingredient_map.insert(ingredient);
-    }
-
-    pub fn get_ingredient_names(&self) -> Vec<String> {
-        return self.ingredient_map.iter().map(|i| i.name.clone()).collect()
-    }
-
-    pub fn get_ingredient(&self, name: &String) -> Option<Ingredient> {
-        self.ingredient_map.iter().find(|&i| &i.name == name).cloned()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use std::vec;
 
-    use super::*;
+    use crate::ingredient_store::{IngredientSelector, IngredientStore};
 
-    #[test]
-    fn test_registration() {
-        let mut store = IngredientStore::default();
-        assert_eq!(store.ingredient_map.len(), 0);
-        let ingredient = Ingredient{ name: "foo".into(), quality: Quality::High, tags: vec![] };
-        store.register_ingredient(ingredient.clone());
-        assert_eq!(store.ingredient_map.len(), 1);
-        store.register_ingredient(ingredient);
-        assert_eq!(store.ingredient_map.len(), 1);
-        let other_ingredient = Ingredient{ name: "foo2".into(), quality: Quality::High, tags: vec![] };
-        store.register_ingredient(other_ingredient);
-        assert_eq!(store.ingredient_map.len(), 2);
-    }
+    use super::*;
 
     #[test]
     fn test_selector_quality() {
         // Setup
         let mut store = IngredientStore::default();
         let high_ingredient1 = Ingredient{ name: "high_1".into(), quality: Quality::High, tags: vec![] };
-        store.register_ingredient(high_ingredient1);
+        store.register(high_ingredient1);
         let high_ingredient2 = Ingredient{ name: "high_2".into(), quality: Quality::High, tags: vec![] };
-        store.register_ingredient(high_ingredient2);
+        store.register(high_ingredient2);
         let mid_ingredient1 = Ingredient{ name: "mid_1".into(), quality: Quality::Medium, tags: vec![] };
-        store.register_ingredient(mid_ingredient1);
+        store.register(mid_ingredient1);
         let mid_ingredient2 = Ingredient{ name: "mid_2".into(), quality: Quality::Medium, tags: vec![] };
-        store.register_ingredient(mid_ingredient2);
+        store.register(mid_ingredient2);
         let low_ingredient1 = Ingredient{ name: "low_1".into(), quality: Quality::Low, tags: vec![] };
-        store.register_ingredient(low_ingredient1);
+        store.register(low_ingredient1);
         let low_ingredient2 = Ingredient{ name: "low_2".into(), quality: Quality::Low, tags: vec![] };
-        store.register_ingredient(low_ingredient2);
+        store.register(low_ingredient2);
 
 
         // Specific quality check
@@ -165,15 +92,14 @@ mod test {
     fn test_selector_any_quality() {
         let mut store = IngredientStore::default();
         let any = Ingredient{ name: "any".into(), quality: Quality::Any, tags:vec![]};
-        store.register_ingredient(any);
+        store.register(any);
         for qual in vec![Some(Quality::Any), Some(Quality::High), Some(Quality::Medium), Some(Quality::Low), None] {
             let selector = IngredientSelector{name: None, quality: qual, tags: None};
             let result = store.select(&selector);
-            println!("{:?}", qual);
             assert_eq!(result.len(), 1);
         }
         let high = Ingredient{ name: "high".into(), quality: Quality::High, tags: vec![]};
-        store.register_ingredient(high);
+        store.register(high);
         for qual in vec![Some(Quality::Any), Some(Quality::High), None] {
             let selector = IngredientSelector{name: None, quality: qual, tags: None};
             let result = store.select(&selector);
@@ -188,9 +114,9 @@ mod test {
         let dupe_1 = Ingredient{ name: "dupe".into(), quality: Quality::Low, tags: vec![]};
         let dupe_2 = Ingredient{ name: "dupe".into(), quality: Quality::High, tags: vec![]};
         let novel = Ingredient{ name: "novel".into(), quality: Quality::Any, tags: vec![]};
-        store.register_ingredient(dupe_1);
-        store.register_ingredient(dupe_2);
-        store.register_ingredient(novel);
+        store.register(dupe_1);
+        store.register(dupe_2);
+        store.register(novel);
 
         // Check specific names
         let dupe_selector = IngredientSelector{ name: Some("dupe".into()), quality: None, tags: None};

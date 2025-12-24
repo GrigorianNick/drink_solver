@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{builder::Builder, ingredients::{Ingredient, IngredientTag, Quality}};
+use crate::{builder::Builder, ingredient::{Ingredient, IngredientTag, Quality}};
 
 #[derive(Clone, Default)]
 pub struct IngredientBuilder {

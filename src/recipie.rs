@@ -1,12 +1,15 @@
 use core::fmt;
 
-use crate::ingredient::{IngredientSelector};
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+use crate::ingredient_store::IngredientSelector;
+
+#[derive(Serialize, Default, Deserialize, PartialEq, Clone, EnumIter)]
 pub enum Measure {
     Oz(f32),
     Shot(f32),
+    #[default]
     Taste
 }
 

@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use egui::Widget;
 
-use crate::ingredient::IngredientStore;
+use crate::ingredient_store::IngredientStore;
 
 pub struct IngredientWidget {
     ingredient_store: Rc<RefCell<IngredientStore>>,
@@ -20,7 +20,9 @@ impl Widget for &mut IngredientWidget {
         ui.with_layout(egui::Layout::left_to_right(egui::Align::Max).with_cross_justify(true), |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.vertical(|ui| {
-                    for name in self.ingredient_store.borrow().get_ingredient_names() {
+                    let mut names = self.ingredient_store.borrow().get_ingredient_names();
+                    names.sort_by_key(|s| s.to_lowercase());
+                    for name in names {
                         ui.selectable_value(&mut self.selected_name, name.clone(), name.clone());
                     }
                 })

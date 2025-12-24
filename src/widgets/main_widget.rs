@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{ingredient::{Ingredient, IngredientSelector, IngredientStore, IngredientTag, Quality}, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}}};
+use crate::{ingredient::{Ingredient, IngredientTag, Quality}, ingredient_store::{IngredientSelector, IngredientStore}, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}}};
 use super::recipie::RecipieWidget;
 
 #[derive(PartialEq, Eq)]
@@ -31,12 +31,12 @@ impl Default for MyApp {
         let simple_syrup = Ingredient { name: "Simple Syrup".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Sweet".into()},IngredientTag{ value: "Sugary".into()}]};
         let tonic = Ingredient { name: "Tonic water".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Fizzy".into()}]};
         let cola = Ingredient { name: "Coca-Cola".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Cola".into()}]};
-        ingredient_store.borrow_mut().register_ingredient(gin);
-        ingredient_store.borrow_mut().register_ingredient(gin2);
-        ingredient_store.borrow_mut().register_ingredient(rum);
-        ingredient_store.borrow_mut().register_ingredient(simple_syrup);
-        ingredient_store.borrow_mut().register_ingredient(tonic);
-        ingredient_store.borrow_mut().register_ingredient(cola);
+        ingredient_store.borrow_mut().register(gin);
+        ingredient_store.borrow_mut().register(gin2);
+        ingredient_store.borrow_mut().register(rum);
+        ingredient_store.borrow_mut().register(simple_syrup);
+        ingredient_store.borrow_mut().register(tonic);
+        ingredient_store.borrow_mut().register(cola);
 
         let gin_and_tonic = Recipie{
             name: "Gin and Tonic".into(),
@@ -82,7 +82,7 @@ impl Default for MyApp {
             recipie_widget: RecipieWidget::new(recipie_store.clone(), ingredient_store.clone()),
             ingredient_widget: IngredientWidget::new(ingredient_store.clone()),
             create_ingredient_widget: CreateIngredientWidget::new(ingredient_store.clone()),
-            create_recipie_widget: CreateRecipieWidget::new(recipie_store.clone()),
+            create_recipie_widget: CreateRecipieWidget::new(recipie_store.clone(), ingredient_store.clone()),
             active_tab: ActiveTab::Inventory
         }
     }

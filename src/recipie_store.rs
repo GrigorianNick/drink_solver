@@ -3,7 +3,7 @@ use std::{collections::HashMap, default, fs::File, io::BufReader, path::PathBuf}
 
 use serde::{Deserialize, Serialize};
 
-use crate::{ingredient::IngredientSelector, recipie::Recipie, store::Store};
+use crate::{recipie::Recipie, store::Store};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct RecipieStore {

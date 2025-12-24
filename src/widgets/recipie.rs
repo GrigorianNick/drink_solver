@@ -2,7 +2,7 @@ use egui::{Button, IntoAtoms, Layout, Widget, containers::menu::menu_style};
 
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{ingredient::IngredientStore, recipie::Component, recipie_store::{self, RecipieStore}, widgets::ingredient};
+use crate::{ingredient_store::IngredientStore, recipie::Component, recipie_store::{self, RecipieStore}, widgets::ingredient};
 
 pub struct RecipieWidget {
     recipie_store: Rc<RefCell<RecipieStore>>,
@@ -40,7 +40,7 @@ impl Widget for &mut RecipieWidget {
                     let mut recipies = self.recipie_store.borrow().get_recipie_entries();
                     recipies.sort_by_key(|r| r.1.name.clone().to_ascii_lowercase());
                     for (id, recipie) in recipies {
-                        ui.selectable_value(&mut self.selected_recipie, id, recipie.name);
+                        ui.selectable_value(&mut self.selected_recipie, id, recipie.name).on_hover_text(recipie.short_description);
                     }
                 })
             });

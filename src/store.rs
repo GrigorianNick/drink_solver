@@ -2,7 +2,7 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
-use crate::recipie_store::RecipieStore;
+use crate::{builder::Builder, recipie_store::RecipieStore};
 
 pub trait Store<T>: Serialize + DeserializeOwned + Default {
 
@@ -13,6 +13,10 @@ pub trait Store<T>: Serialize + DeserializeOwned + Default {
     fn get_config_path(&self) -> Option<PathBuf>;
 
     fn register(&mut self, entry: T) -> uuid::Uuid;
+
+    fn build_from<B: Builder<T>>(&mut self, builder: &B) -> uuid::Uuid {
+        self.register(builder.build())
+    }
 
     fn from_config(config_dir: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
         let path = config_dir.join(Self::get_json_name());
