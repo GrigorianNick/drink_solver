@@ -3,17 +3,34 @@ use std::{cell::RefCell, rc::Rc};
 use egui::{Button, ComboBox, Widget};
 use strum::IntoEnumIterator;
 
-use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality, QualityIter}, ingredient_selector_builder::IngredientSelectorBuilder, ingredient_store::{IngredientSelector, IngredientStore}, recipie::Component, widgets::{create_ingredient::VecEnumWidget, create_vec::{CreateVecWidget, CreateVecWidgetKernel}}};
+use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality, QualityIter}, ingredient_selector_builder::IngredientSelectorBuilder, ingredient_store::{IngredientSelector, IngredientStore}, recipie::Component, widgets::{create_ingredient::{VecEnumWidget, VecWidget}, create_vec::{CreateVecWidget, CreateVecWidgetKernel}}};
 
 #[derive(Clone, Default)]
 pub struct CreateComponentEntryWidget {
     builder: ComponentBuilder,
-    store: Rc<RefCell<IngredientStore>>
+    store: Rc<RefCell<IngredientStore>>,
+    tag_widget: CreateVecWidget<String, VecEnumWidget>,
+    id: uuid::Uuid
 }
 
 impl CreateComponentEntryWidget {
     pub fn new(store: Rc<RefCell<IngredientStore>>) -> CreateComponentEntryWidget {
-        CreateComponentEntryWidget { builder: ComponentBuilder::default(), store }
+        let tags = store.borrow().get_tags().iter().map(|t| t.value.clone()).collect();
+        CreateComponentEntryWidget {
+            builder: ComponentBuilder::default(),
+            store,
+            tag_widget: CreateVecWidget::new(VecEnumWidget::new(tags)),
+            id: uuid::Uuid::new_v4() }
+    }
+
+    pub fn build(&self) -> Component {
+        let mut component = self.builder.build();
+        let tag_vals = self.tag_widget.get_entries();
+        if !tag_vals.is_empty() {
+            let tags = tag_vals.into_iter().map(|t| IngredientTag{ value: t.clone()}).collect();
+            component.ingredient.tags = Some(tags)
+        }
+        component
     }
 }
 
@@ -21,14 +38,26 @@ impl Widget for &mut CreateComponentEntryWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
-                ui.label("Name")
-            })
+                ui.label("Name");
+                ui.text_edit_singleline(&mut self.builder.selector.name);
+                ui.label("Quality");
+                ComboBox::from_id_salt(self.id)
+                    .selected_text(self.builder.selector.quality.unwrap_or_default().to_string())
+                    .show_ui(ui, |ui| {
+                        for quality in Quality::iter() {
+                            ui.selectable_value(&mut self.builder.selector.quality, Some(quality), quality.to_string());
+                        }
+                })
+            });
+            ui.separator();
+            ui.add(&mut self.tag_widget)
         }).response
     }
 }
 
 #[derive(Clone)]
 pub struct CreateComponentWidget {
+    entries: Vec<CreateComponentEntryWidget>,
     builders: Vec<ComponentBuilder>,
     store: Rc<RefCell<IngredientStore>>
 }
@@ -36,42 +65,15 @@ pub struct CreateComponentWidget {
 impl CreateComponentWidget {
 
     pub fn new(store: Rc<RefCell<IngredientStore>>) -> CreateComponentWidget {
-        CreateComponentWidget { builders: vec![], store: store }
-    }
-
-    // Returns response and if it should be deleted or not
-    fn add_entry(ui: &mut egui::Ui, idx: usize, builder: &mut ComponentBuilder, names: &Vec<String>, tags: &Vec<IngredientTag>) -> (egui::Response, bool) {
-        let mut should_delete = false;
-        let resp = ui.horizontal(|ui| {
-            ui.vertical(|ui| {
-                ui.label("Name");
-                ComboBox::from_id_salt(("Name", idx)).selected_text(builder.selector.name.clone()).show_ui(ui, |ui| {
-                    for name in names {
-                        ui.selectable_value(&mut builder.selector.name, name.clone(), name.clone());
-                    }
-                });
-                ui.label("Quality");
-                ComboBox::from_id_salt(("Quality", idx)).selected_text(builder.selector.quality.unwrap_or_default().to_string()).show_ui(ui, |ui| {
-                    for quality in Quality::iter() {
-                        ui.selectable_value(&mut builder.selector.quality, Some(quality), quality.to_string());
-                    }
-                }).response
-            });
-            ui.separator();
-            let ts: Vec<String> = tags.into_iter().map(|t| t.value.clone()).collect();
-            ui.add(&mut CreateVecWidget::new(VecEnumWidget::new(ts)));
-            ui.separator();
-            let resp = ui.add(Button::new("X"));
-            if resp.clicked() {
-                should_delete = true
-            }
-            resp
-        }).response;
-        (resp, should_delete)
+        CreateComponentWidget { entries: vec![], builders: vec![], store: store }
     }
 
     pub fn get_components(&self) -> Vec<Component> {
-        self.builders.iter().map(|b| b.build()).collect()
+        self.entries.iter().map(|entry| entry.build()).collect()
+    }
+
+    pub fn clear(&mut self) {
+        self.entries.clear()
     }
 }
 
@@ -81,22 +83,18 @@ impl Widget for &mut CreateComponentWidget {
         names.sort_by_key(|s| s.to_lowercase());
         let mut tags = self.store.borrow().get_tags();
         tags.sort_by_key(|t| t.value.to_lowercase());
-        ui.vertical(|ui| {
-            let mut to_remove = None;
-            for (i, builder) in self.builders.iter_mut().enumerate() {
-                if let (_, true) = CreateComponentWidget::add_entry(ui, i, builder, &names, &tags) {
-                    to_remove = Some(i)
+        egui::ScrollArea::vertical().show(ui, |ui|{
+            ui.vertical(|ui| {
+                for entry in &mut self.entries {
+                    ui.add(entry);
+                    ui.separator();
                 }
-                ui.separator();
-            }
-            if let Some(idx) = to_remove {
-                self.builders.remove(idx);
-            }
-            let resp = ui.button("Add entry");
-            if resp.clicked() {
-                self.builders.push(ComponentBuilder::default());
-            }
-            resp
-        }).response
+                let resp = ui.button("Add Component");
+                if resp.clicked() {
+                    self.entries.push(CreateComponentEntryWidget::new(self.store.clone()));
+                }
+                resp
+            }).response
+        }).inner
     }
 }

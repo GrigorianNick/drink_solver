@@ -40,6 +40,7 @@ impl Widget for &mut CreateRecipieWidget {
             ui.push_id(0, |ui| {
                 ScrollArea::vertical().show(ui, |ui| {
                     ui.vertical(|ui| {
+                        ui.label("Instructions");
                         ui.add(&mut self.instruction_widget)
                     })
                 })
@@ -60,6 +61,8 @@ impl Widget for &mut CreateRecipieWidget {
                 self.builder.clear();
             }
             if ui.button("Reset").clicked() {
+                self.instruction_widget.clear();
+                self.component_widget.clear();
                 self.builder.clear()
             }
         }).response

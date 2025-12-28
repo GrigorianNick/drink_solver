@@ -5,10 +5,11 @@ use egui::{ComboBox, Widget};
 
 pub enum EntryConstraint<T> {
     Freeform,
-    Enumerated(Vec<T>)
+    Enumerated(Vec<T>, uuid::Uuid)
 }
 
 pub trait CreateVecWidgetKernel<T: Default + egui::TextBuffer> {
+    fn clear(&mut self);
     fn get_entries(&self) -> Vec<T>;
     fn get_entries_mut(&mut self) -> &mut Vec<T>;
     fn get_entry_constraint(&self) -> EntryConstraint<T>;
@@ -41,12 +42,12 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
         b
     }
 
-    fn build_enumerated(&mut self, ui: &mut egui::Ui, enums: &Vec<T>) -> egui::Response {
+    fn build_enumerated(&mut self, ui: &mut egui::Ui, enums: &Vec<T>, id: impl std::hash::Hash) -> egui::Response {
         if enums.is_empty() {
             return ui.label("No options provided!");
         }
         for (i, val) in self.kernel.get_entries_mut().iter_mut().enumerate() {
-            ComboBox::from_id_salt(i).selected_text(val.as_str()).show_ui(ui, |ui| {
+            ComboBox::from_id_salt((i, &id)).selected_text(val.as_str()).show_ui(ui, |ui| {
                 for e in enums {
                     ui.selectable_value(val, e.clone(), e.as_str());
                 }
@@ -66,13 +67,17 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
     pub fn new(kernel: Kernel) -> CreateVecWidget<T, Kernel> {
         CreateVecWidget { kernel, phantom: PhantomData::default() }
     }
+
+    pub fn clear(&mut self) {
+        self.kernel.clear();
+    }
 }
 
 impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKernel<T>> Widget for &mut CreateVecWidget<T, Kernel> {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         match self.kernel.get_entry_constraint() {
             EntryConstraint::Freeform => self.build_freeform(ui),
-            EntryConstraint::Enumerated(items) => self.build_enumerated(ui, &items),
+            EntryConstraint::Enumerated(items, id) => self.build_enumerated(ui, &items, id),
         }
     }
 }

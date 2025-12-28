@@ -22,17 +22,22 @@ impl CreateVecWidgetKernel<String> for VecWidget {
     fn get_entries(&self) -> Vec<String> {
         self.entries.clone()
     }
+
+    fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
 
 #[derive(Default, Clone)]
 pub struct VecEnumWidget {
     enums: Vec<String>,
-    entries: Vec<String>
+    entries: Vec<String>,
+    id: uuid::Uuid
 }
 
 impl VecEnumWidget {
     pub fn new(enums: Vec<String>) -> VecEnumWidget {
-        VecEnumWidget { enums: enums, entries: vec![] }
+        VecEnumWidget { enums: enums, entries: vec![], id: uuid::Uuid::new_v4() }
     }
 }
 
@@ -46,7 +51,11 @@ impl CreateVecWidgetKernel<String> for VecEnumWidget {
     }
 
     fn get_entry_constraint(&self) -> super::create_vec::EntryConstraint<String> {
-        super::create_vec::EntryConstraint::Enumerated(self.enums.clone())
+        super::create_vec::EntryConstraint::Enumerated(self.enums.clone(), self.id)
+    }
+
+    fn clear(&mut self) {
+        self.entries.clear();
     }
 }
 
@@ -73,6 +82,7 @@ impl CreateIngredientWidget {
 
 impl Widget for &mut CreateIngredientWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        ui.label("Name");
         ui.text_edit_singleline(&mut self.builder.name);
         ui.separator();
         ui.label("Quality");
@@ -84,6 +94,7 @@ impl Widget for &mut CreateIngredientWidget {
             }
         });
         ui.separator();
+        ui.label("Tags");
         ScrollArea::vertical().show(ui, |ui| {
             ui.vertical(|ui| {
                 ui.add(&mut self.tag_widget)
