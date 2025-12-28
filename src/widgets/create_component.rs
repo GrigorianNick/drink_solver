@@ -17,6 +17,16 @@ impl CreateComponentEntryWidget {
     }
 }
 
+impl Widget for &mut CreateComponentEntryWidget {
+    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                ui.label("Name")
+            })
+        }).response
+    }
+}
+
 #[derive(Clone)]
 pub struct CreateComponentWidget {
     builders: Vec<ComponentBuilder>,
