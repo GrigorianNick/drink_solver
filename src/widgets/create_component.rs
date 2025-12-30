@@ -51,9 +51,12 @@ impl Widget for &mut CreateComponentEntryWidget {
                 ui.label("Quantity");
                 ui.horizontal(|ui| {
                     match &mut self.builder.measure {
-                        crate::recipie::Measure::Taste => (),
-                        crate::recipie::Measure::Oz(val) => { ui.add(DragValue::new(val).speed(0.1)); },
-                        crate::recipie::Measure::Shot(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        Measure::Taste => (),
+                        Measure::Oz(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        Measure::Shot(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        Measure::Ml(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        Measure::Liter(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        Measure::Handle(val) => { ui.add(DragValue::new(val).speed(0.1)); },
                     };
                     ComboBox::from_id_salt(("Quantity", self.id))
                         .selected_text(self.builder.measure.to_string())

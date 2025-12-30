@@ -40,8 +40,11 @@ impl Store<Ingredient> for IngredientStore {
             self.ingredient_tags.insert(tag.clone());
         }
         self.ingredient_map.insert(id, entry);
-        self.save();
         id
+    }
+
+    fn deregister(&mut self, id: uuid::Uuid) -> bool {
+        self.ingredient_map.remove(&id).is_some()
     }
     
     fn get_entries(&self) -> Vec<Ingredient> {
@@ -116,5 +119,9 @@ impl IngredientStore {
 
     pub fn get_ingredient(&self, name: &String) -> Option<Ingredient> {
         self.ingredient_map.values().find(|&i| &i.name == name).cloned()
+    }
+
+    pub fn get_ingredient_entries(&mut self) -> Vec<(uuid::Uuid, &mut Ingredient)> {
+        self.ingredient_map.iter_mut().map(|(id, i)| (id.clone(), i)).collect()
     }
 }

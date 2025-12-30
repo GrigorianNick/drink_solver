@@ -14,6 +14,8 @@ pub trait Store<T>: Serialize + DeserializeOwned + Default {
 
     fn register(&mut self, entry: T) -> uuid::Uuid;
 
+    fn deregister(&mut self, id: uuid::Uuid) -> bool;
+
     fn get_entries(&self) -> Vec<T>;
 
     fn get_entries_mut(&mut self) -> Vec<&mut T>;

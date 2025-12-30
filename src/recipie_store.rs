@@ -45,6 +45,10 @@ impl Store<Recipie> for RecipieStore {
         self.recipies.insert(id, entry);
         id
     }
+
+    fn deregister(&mut self, id: uuid::Uuid) -> bool {
+        self.recipies.remove(&id).is_some()
+    }
     
     fn get_entries(&self) -> Vec<Recipie> {
         self.recipies.values().cloned().collect()

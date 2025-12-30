@@ -39,6 +39,10 @@ impl Widget for &mut RecipieWidget {
         SidePanel::left("recipie_side_panel_recipie_list").show_inside(ui, |ui| {
             if ui.checkbox(&mut self.show_in_stock, "Show in stock").clicked() {
                 self.selected_recipie = uuid::Uuid::new_v4();
+                let stock = if self.show_in_stock { Some(true) } else { None };
+                for entry in self.recipie_store.borrow_mut().get_entries_mut() {
+                    entry.components.iter_mut().for_each(|c| c.ingredient.in_stock = stock);
+                }
             }
             ui.separator();
             egui::ScrollArea::vertical().show(ui, |ui| {
