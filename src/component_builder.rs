@@ -1,4 +1,4 @@
-use crate::{builder::Builder, ingredient_selector_builder::IngredientSelectorBuilder, recipie::{Component, Measure}};
+use crate::{builder::Builder, ingredient_selector_builder::IngredientSelectorBuilder, measure::Measure, recipie::Component};
 
 #[derive(Clone, Default)]
 pub struct ComponentBuilder {

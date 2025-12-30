@@ -12,11 +12,10 @@ mod store;
 mod ingredient_store;
 mod ingredient_selector_builder;
 mod component_builder;
-
-use std::io::Read;
+mod measure;
 
 use eframe::egui;
-use egui::{IconData, Image, ImageSource, Style, Visuals, emath::interpolation_factor, epaint::image, include_image};
+use egui::{Color32, IconData};
 use ::image::load_from_memory;
 
 fn main() -> eframe::Result {

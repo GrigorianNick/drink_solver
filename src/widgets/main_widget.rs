@@ -1,8 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egui::{CentralPanel, TopBottomPanel};
+use egui::{CentralPanel, Frame, MenuBar, Theme, TopBottomPanel};
 
-use crate::{ingredient::{Ingredient, IngredientTag, Quality}, ingredient_store::{IngredientSelector, IngredientStore}, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}}};
+use crate::{ingredient::{Ingredient, IngredientTag, Quality}, ingredient_store::{IngredientSelector, IngredientStore}, measure::Measure, recipie::{Component, Recipie}, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_ingredient::CreateIngredientWidget, create_recipie::CreateRecipieWidget, ingredient::{self, IngredientWidget}, styling}};
 use super::recipie::RecipieWidget;
 
 #[derive(PartialEq, Eq)]
@@ -48,11 +48,11 @@ impl Default for MyApp {
             components: vec![
                 Component{
                     ingredient: IngredientSelector{ name: None, quality: None, tags: Some(vec![IngredientTag{ value: "Gin".into()}]), in_stock: None },
-                    amount: crate::recipie::Measure::Oz(2.5)
+                    amount: Measure::Oz(2.5)
                 },
                 Component{
                     ingredient: IngredientSelector{ name: Some("Tonic water".into()), quality: None, tags: None, in_stock: None },
-                    amount: crate::recipie::Measure::Oz(2.5)
+                    amount: Measure::Oz(2.5)
                 }
                 ],
             instructions: vec!["Put in Gin".into(), "Put in tonic".into(), "Mix".into()]
@@ -65,11 +65,11 @@ impl Default for MyApp {
             components: vec![
                 Component{
                     ingredient: IngredientSelector{ name: None, quality: None, tags: Some(vec![IngredientTag{ value: "Rum".into()}]), in_stock: None },
-                    amount: crate::recipie::Measure::Oz(2.5)
+                    amount: Measure::Oz(2.5)
                 },
                 Component{
                     ingredient: IngredientSelector{ name: None, quality: None, tags: Some(vec![IngredientTag{ value: "Cola".into()}]), in_stock: None },
-                    amount: crate::recipie::Measure::Oz(5.0)
+                    amount: Measure::Oz(5.0)
                 }
                 ],
             instructions: vec!["Put in ice".into(), "Put in rum".into(), "Top with coke".into()]
@@ -94,6 +94,11 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         TopBottomPanel::top("main_header").show(ctx, |ui| {
             ui.heading("Drink Solver");
+            MenuBar::new().ui(ui, |ui| {
+                ui.menu_button("Preferences", |ui| {
+                    styling::build_menu(ctx, ui)
+                })
+            });
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.active_tab, ActiveTab::Inventory, "Inventory");
                 ui.selectable_value(&mut self.active_tab, ActiveTab::Recipies, "Recipies");

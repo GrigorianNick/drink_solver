@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use egui::{ComboBox, DragValue, Widget};
 use strum::IntoEnumIterator;
 
-use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality}, ingredient_store::IngredientStore, recipie::{Component, Measure}, widgets::{create_ingredient::VecEnumWidget, create_vec::CreateVecWidget}};
+use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality}, ingredient_store::IngredientStore, measure::Measure, recipie::Component, widgets::{create_ingredient::VecEnumWidget, create_vec::CreateVecWidget}};
 
 #[derive(Clone, Default)]
 pub struct CreateComponentEntryWidget {
