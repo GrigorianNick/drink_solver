@@ -1,12 +1,11 @@
-use std::str::FromStr;
-
 use crate::{builder::Builder, ingredient::{Ingredient, IngredientTag, Quality}};
 
 #[derive(Clone, Default)]
 pub struct IngredientBuilder {
     pub name: String,
     pub quality: Quality,
-    pub tags: Vec<String>
+    pub tags: Vec<String>,
+    pub stock: u16
 }
 
 impl From<Ingredient> for IngredientBuilder {
@@ -14,7 +13,8 @@ impl From<Ingredient> for IngredientBuilder {
         IngredientBuilder {
             name: value.name,
             quality: value.quality,
-            tags: value.tags.iter().map(|t| t.value.clone()).collect() }
+            tags: value.tags.iter().map(|t| t.value.clone()).collect(),
+            stock: value.stock}
     }
 }
 
@@ -23,7 +23,8 @@ impl Into<Ingredient> for IngredientBuilder {
         Ingredient {
             name: self.name.clone(),
             quality: self.quality,
-            tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect() }
+            tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect(),
+            stock: self.stock }
     }
 }
 
@@ -38,6 +39,7 @@ impl Builder<Ingredient> for IngredientBuilder {
         Ingredient {
             name: self.name.clone(),
             quality: self.quality,
-            tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect() }
+            tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect(),
+            stock: self.stock }
     }
 }

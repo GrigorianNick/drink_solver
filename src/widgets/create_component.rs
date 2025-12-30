@@ -1,9 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egui::{Button, ComboBox, Widget};
+use egui::{ComboBox, DragValue, Widget};
 use strum::IntoEnumIterator;
 
-use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality, QualityIter}, ingredient_selector_builder::IngredientSelectorBuilder, ingredient_store::{IngredientSelector, IngredientStore}, recipie::Component, widgets::{create_ingredient::{VecEnumWidget, VecWidget}, create_vec::{CreateVecWidget, CreateVecWidgetKernel}}};
+use crate::{builder::Builder, component_builder::ComponentBuilder, ingredient::{IngredientTag, Quality}, ingredient_store::IngredientStore, recipie::{Component, Measure}, widgets::{create_ingredient::VecEnumWidget, create_vec::CreateVecWidget}};
 
 #[derive(Clone, Default)]
 pub struct CreateComponentEntryWidget {
@@ -41,16 +41,33 @@ impl Widget for &mut CreateComponentEntryWidget {
                 ui.label("Name");
                 ui.text_edit_singleline(&mut self.builder.selector.name);
                 ui.label("Quality");
-                ComboBox::from_id_salt(self.id)
+                ComboBox::from_id_salt(("Quality", self.id))
                     .selected_text(self.builder.selector.quality.unwrap_or_default().to_string())
                     .show_ui(ui, |ui| {
                         for quality in Quality::iter() {
                             ui.selectable_value(&mut self.builder.selector.quality, Some(quality), quality.to_string());
                         }
+                });
+                ui.label("Quantity");
+                ui.horizontal(|ui| {
+                    match &mut self.builder.measure {
+                        crate::recipie::Measure::Taste => (),
+                        crate::recipie::Measure::Oz(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                        crate::recipie::Measure::Shot(val) => { ui.add(DragValue::new(val).speed(0.1)); },
+                    };
+                    ComboBox::from_id_salt(("Quantity", self.id))
+                        .selected_text(self.builder.measure.to_string())
+                        .show_ui(ui, |ui| {
+                            for measure in Measure::iter() {
+                                ui.selectable_value(&mut self.builder.measure, measure.clone(), measure.to_string());
+                            }
+                        })
                 })
             });
             ui.separator();
-            ui.add(&mut self.tag_widget)
+            ui.vertical(|ui| {
+                ui.add(&mut self.tag_widget)
+            })
         }).response
     }
 }
@@ -83,7 +100,7 @@ impl Widget for &mut CreateComponentWidget {
         names.sort_by_key(|s| s.to_lowercase());
         let mut tags = self.store.borrow().get_tags();
         tags.sort_by_key(|t| t.value.to_lowercase());
-        egui::ScrollArea::vertical().show(ui, |ui|{
+        //egui::ScrollArea::vertical().show(ui, |ui|{
             ui.vertical(|ui| {
                 for entry in &mut self.entries {
                     ui.add(entry);
@@ -95,6 +112,6 @@ impl Widget for &mut CreateComponentWidget {
                 }
                 resp
             }).response
-        }).inner
+        //}).inner
     }
 }

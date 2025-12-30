@@ -1,9 +1,10 @@
 use core::fmt;
+use std::{cell::RefCell, rc::Rc};
 
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;
 
-use crate::ingredient_store::IngredientSelector;
+use crate::ingredient_store::{IngredientSelector, IngredientStore};
 
 #[derive(Serialize, Default, Deserialize, PartialEq, Clone, EnumIter)]
 pub enum Measure {
@@ -40,4 +41,10 @@ pub struct Recipie {
 }
 
 impl Recipie {
+    pub fn can_make(&self, store: Rc<RefCell<IngredientStore>>) -> bool{
+        self.components.iter().cloned().all(|mut c| {
+            c.ingredient.in_stock = Some(true);
+            !store.borrow().select(&c.ingredient).is_empty()
+    })
+    }
 }

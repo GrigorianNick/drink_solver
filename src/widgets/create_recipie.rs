@@ -1,8 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egui::{Button, Layout, ScrollArea, Separator, Widget};
+use egui::{Button, CentralPanel, Layout, ScrollArea, Separator, TopBottomPanel, Widget};
 
-use crate::{builder::Builder, ingredient_store::IngredientStore, recipie_builder::RecipieBuilder, recipie_store::{self, RecipieStore}, store::Store, widgets::{create_component::CreateComponentWidget, create_ingredient::VecWidget, create_vec::CreateVecWidget}};
+use crate::{builder::Builder, ingredient_store::IngredientStore, recipie_builder::RecipieBuilder, recipie_store::RecipieStore, store::Store, widgets::{create_component::CreateComponentWidget, create_ingredient::VecWidget, create_vec::CreateVecWidget}};
 
 #[derive(Clone)]
 pub struct CreateRecipieWidget {
@@ -24,47 +24,54 @@ impl CreateRecipieWidget {
 
 impl Widget for &mut CreateRecipieWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        ui.label("Name");
-        ui.text_edit_singleline(&mut self.builder.name);
-        ui.separator();
-        ui.horizontal( |ui| {
-            ui.vertical(|ui| {
-                ui.label("Short description");
-                ui.text_edit_singleline(&mut self.builder.short_description);
-                ui.label("Description");
-                ui.text_edit_multiline(&mut self.builder.description);
-                ui.label("Notes");
-                ui.text_edit_multiline(&mut self.builder.notes)
-            });
-            ui.separator();
-            ui.push_id(0, |ui| {
-                ScrollArea::vertical().show(ui, |ui| {
-                    ui.vertical(|ui| {
-                        ui.label("Instructions");
-                        ui.add(&mut self.instruction_widget)
+        TopBottomPanel::top("create_recipie_top").show_inside(ui, |ui| {
+            ui.label("Name");
+            ui.text_edit_singleline(&mut self.builder.name);
+        });
+        TopBottomPanel::bottom("create_recipie_bottom").show_inside(ui, |ui| {
+            ui.with_layout(Layout::left_to_right(egui::Align::Center), |ui| {
+                let btn = Button::new("Save");
+                if ui.add_enabled(!self.builder.name.is_empty(), btn).clicked() {
+                    self.builder.instructions = self.instruction_widget.get_entries();
+                    self.builder.components = self.component_widget.get_components();
+                    self.recipie_store.borrow_mut().build_from(&self.builder);
+                    self.builder.clear();
+                }
+                let resp = ui.button("Reset");
+                if resp.clicked() {
+                    self.instruction_widget.clear();
+                    self.component_widget.clear();
+                    self.builder.clear()
+                }
+                resp
+            }).response
+        });
+        CentralPanel::default().show_inside(ui, |ui| {
+            ui.with_layout(Layout::left_to_right(egui::Align::Min).with_cross_justify(true), |ui| {
+                ui.vertical(|ui| {
+                    ui.label("Short description");
+                    ui.text_edit_singleline(&mut self.builder.short_description);
+                    ui.label("Description");
+                    ui.text_edit_multiline(&mut self.builder.description);
+                    ui.label("Notes");
+                    ui.text_edit_multiline(&mut self.builder.notes)
+                });
+                ui.separator();
+                ui.push_id(0, |ui| {
+                    ScrollArea::vertical().show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            ui.label("Instructions");
+                            ui.add(&mut self.instruction_widget)
+                        })
+                    })
+                });
+                ui.separator();
+                ui.push_id(1, |ui| {
+                    ScrollArea::vertical().show(ui, |ui| {
+                        ui.add(&mut self.component_widget)
                     })
                 })
-            });
-            ui.separator();
-            ui.push_id(1, |ui| {
-                ScrollArea::vertical().show(ui, |ui| {
-                    ui.add(&mut self.component_widget)
-                })
             })
-        });
-        ui.separator();
-        ui.horizontal( |ui| {
-            let btn = Button::new("Save");
-            if ui.add_enabled(!self.builder.name.is_empty(), btn).clicked() {
-                self.builder.instructions = self.instruction_widget.get_entries();
-                self.recipie_store.borrow_mut().build_from(&self.builder);
-                self.builder.clear();
-            }
-            if ui.button("Reset").clicked() {
-                self.instruction_widget.clear();
-                self.component_widget.clear();
-                self.builder.clear()
-            }
         }).response
     }
 }

@@ -46,12 +46,21 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
         if enums.is_empty() {
             return ui.label("No options provided!");
         }
+        let mut to_remove = vec![];
         for (i, val) in self.kernel.get_entries_mut().iter_mut().enumerate() {
-            ComboBox::from_id_salt((i, &id)).selected_text(val.as_str()).show_ui(ui, |ui| {
-                for e in enums {
-                    ui.selectable_value(val, e.clone(), e.as_str());
+            ui.horizontal(|ui| {
+                ComboBox::from_id_salt((i, &id)).selected_text(val.as_str()).show_ui(ui, |ui| {
+                    for e in enums {
+                        ui.selectable_value(val, e.clone(), e.as_str());
+                    }
+                });
+                if ui.button("X").clicked() {
+                    to_remove.push(i);
                 }
             });
+        }
+        for i in to_remove.iter().rev() {
+            self.kernel.get_entries_mut().remove(*i);
         }
         let b = ui.button("Add entry");
         if b.clicked() {

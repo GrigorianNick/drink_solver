@@ -1,8 +1,8 @@
-use egui::{Button, IntoAtoms, Layout, Widget, containers::menu::menu_style};
+use egui::{Button, CentralPanel, SidePanel, Widget};
 
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{ingredient_store::IngredientStore, recipie::Component, recipie_store::{self, RecipieStore}, widgets::ingredient};
+use crate::{ingredient_store::IngredientStore, recipie::{self, Component}, recipie_store::RecipieStore, store::Store};
 
 pub struct RecipieWidget {
     recipie_store: Rc<RefCell<RecipieStore>>,
@@ -11,13 +11,15 @@ pub struct RecipieWidget {
     old_selected_recipie: uuid::Uuid,
     component_widgets: Vec<ComponentWidget>,
     selected: String,
-    editing: bool
+    editing: bool,
+    // Only show recipies we can make with our current stock
+    show_in_stock: bool
 
 }
 
 impl RecipieWidget {
     pub fn new(recipie_store: Rc<RefCell<RecipieStore>>, ingredient_store: Rc<RefCell<IngredientStore>>) -> RecipieWidget {
-        RecipieWidget { recipie_store: recipie_store, ingredient_store: ingredient_store, selected_recipie: uuid::Uuid::nil(), old_selected_recipie: uuid::Uuid::nil(), component_widgets: vec![], selected: "".into(), editing: false }
+        RecipieWidget { recipie_store: recipie_store, ingredient_store: ingredient_store, selected_recipie: uuid::Uuid::nil(), old_selected_recipie: uuid::Uuid::nil(), component_widgets: vec![], selected: "".into(), editing: false, show_in_stock: false }
     }
 
     pub fn handle_selection(&mut self) {
@@ -26,7 +28,7 @@ impl RecipieWidget {
         }
         self.old_selected_recipie = self.selected_recipie;
         self.component_widgets.clear();
-        if let Some(recipie) = self.recipie_store.borrow().get_recipie(self.selected_recipie) {
+        if let Some(recipie) = self.recipie_store.borrow().get_entry(self.selected_recipie) {
             self.component_widgets = recipie.components.iter().map(|c| return ComponentWidget::new(c.clone(), self.ingredient_store.clone())).collect();
         }
     }
@@ -34,19 +36,32 @@ impl RecipieWidget {
 
 impl Widget for &mut RecipieWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        ui.with_layout(egui::Layout::left_to_right(egui::Align::Max).with_cross_justify(true), |ui| {
+        SidePanel::left("recipie_side_panel_recipie_list").show_inside(ui, |ui| {
+            if ui.checkbox(&mut self.show_in_stock, "Show in stock").clicked() {
+                self.selected_recipie = uuid::Uuid::new_v4();
+            }
+            ui.separator();
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.vertical(|ui| {
                     let mut recipies = self.recipie_store.borrow().get_recipie_entries();
                     recipies.sort_by_key(|r| r.1.name.clone().to_ascii_lowercase());
-                    for (id, recipie) in recipies {
-                        ui.selectable_value(&mut self.selected_recipie, id, recipie.name).on_hover_text(recipie.short_description);
+                    if self.show_in_stock {
+                        for (id, recipie) in recipies {
+                            if recipie.can_make(self.ingredient_store.clone()) {
+                                ui.selectable_value(&mut self.selected_recipie, id, recipie.name).on_hover_text(recipie.short_description);
+                            }
+                        }
+                    } else {
+                        for (id, recipie) in recipies {
+                            ui.selectable_value(&mut self.selected_recipie, id, recipie.name).on_hover_text(recipie.short_description);
+                        }
                     }
                 })
             });
             self.handle_selection();
-            ui.separator();
-            if let Some(recipie) = self.recipie_store.borrow().get_recipie(self.selected_recipie) {
+        });
+        CentralPanel::default().show_inside(ui, |ui| {
+            if let Some(recipie) = self.recipie_store.borrow().get_entry(self.selected_recipie) {
                 ui.vertical(|ui| {
                     ui.horizontal(|ui| {
                         ui.heading(recipie.name);

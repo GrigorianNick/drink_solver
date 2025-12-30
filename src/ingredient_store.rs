@@ -4,14 +4,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::{ingredient::{Ingredient, IngredientTag, Quality}, store::Store};
 
-
-
 // Struct for finding ingredients in an ingredient store
 #[derive(Serialize, Default, Deserialize, Clone)]
 pub struct IngredientSelector {
     pub name: Option<String>,
     pub quality: Option<Quality>,
-    pub tags: Option<Vec<IngredientTag>>
+    pub tags: Option<Vec<IngredientTag>>,
+    pub in_stock: Option<bool>
 }
 
 // A store of ingredients
@@ -41,15 +40,38 @@ impl Store<Ingredient> for IngredientStore {
             self.ingredient_tags.insert(tag.clone());
         }
         self.ingredient_map.insert(id, entry);
+        self.save();
         id
+    }
+    
+    fn get_entries(&self) -> Vec<Ingredient> {
+        self.ingredient_map.values().cloned().collect()
+    }
+    
+    fn get_entries_mut(&mut self) -> Vec<&mut Ingredient> {
+        self.ingredient_map.values_mut().collect()
+    }
+    
+    fn get_entry(&self, id: uuid::Uuid) -> Option<Ingredient> {
+        match self.ingredient_map.get(&id) {
+            Some(entry) => Some(entry.clone()),
+            None => None,
+        }
+    }
+    
+    fn get_entry_mut(&mut self, id: uuid::Uuid) -> Option<&mut Ingredient> {
+        match self.ingredient_map.get_mut(&id) {
+            Some(entry) => Some(entry),
+            None => None
+        }
     }
 }
 
 impl IngredientStore {
-    pub fn new() -> IngredientStore
+    /*pub fn new() -> IngredientStore
     {
         IngredientStore::default()
-    }
+    }*/
 
     pub fn select(&self, selector: &IngredientSelector) -> Vec<Ingredient>
     {
@@ -73,6 +95,12 @@ impl IngredientStore {
                     }
                     return true;
                 },
+                None => true
+            }
+        }).filter(|i| {
+            match selector.in_stock {
+                Some(true) => i.stock > 0,
+                Some(false) => i.stock == 0,
                 None => true
             }
         }).cloned().collect()

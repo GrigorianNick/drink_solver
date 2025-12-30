@@ -1,5 +1,4 @@
-use crate::ingredient_store::IngredientSelector;
-use crate::recipie::{self, Component, Recipie};
+use crate::recipie::{Component, Recipie};
 use crate::builder::Builder;
 
 #[derive(Clone, Default)]
