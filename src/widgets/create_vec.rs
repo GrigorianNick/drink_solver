@@ -12,6 +12,7 @@ pub trait CreateVecWidgetKernel<T: Default + egui::TextBuffer> {
     fn get_entries(&self) -> Vec<T>;
     fn get_entries_mut(&mut self) -> &mut Vec<T>;
     fn get_entry_constraint(&self) -> EntryConstraint<T>;
+    fn set_entries(&mut self, entries: Vec<T>);
 }
 
 #[derive(Default, Clone)]
@@ -86,6 +87,14 @@ impl<T: Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetK
     }
 
     pub fn new(kernel: Kernel) -> CreateVecWidget<T, Kernel> {
+        CreateVecWidget {
+            kernel,
+            phantom: PhantomData::default(),
+        }
+    }
+
+    pub fn from(mut kernel: Kernel, entries: Vec<T>) -> CreateVecWidget<T, Kernel> {
+        kernel.set_entries(entries);
         CreateVecWidget {
             kernel,
             phantom: PhantomData::default(),

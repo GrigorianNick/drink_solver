@@ -21,6 +21,10 @@ impl CreateVecWidgetKernel<String> for VecWidget {
     fn clear(&mut self) {
         self.entries.clear();
     }
+    
+    fn set_entries(&mut self, entries: Vec<String>) {
+        self.entries = entries.clone();
+    }
 }
 
 #[derive(Default, Clone)]
@@ -55,5 +59,9 @@ impl CreateVecWidgetKernel<String> for VecEnumWidget {
 
     fn clear(&mut self) {
         self.entries.clear();
+    }
+    
+    fn set_entries(&mut self, entries: Vec<String>) {
+        self.entries = entries.clone();
     }
 }
