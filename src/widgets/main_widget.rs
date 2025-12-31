@@ -27,12 +27,12 @@ impl Default for MyApp {
     fn default() -> Self {
         let recipie_store = Rc::new(RefCell::new(RecipieStore::new()));
         let ingredient_store = Rc::new(RefCell::new(IngredientStore::new()));
-        let gin = Ingredient { name: "Roku".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}], stock: 0 };
-        let gin2 = Ingredient { name: "Virago".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}], stock: 0 };
-        let rum = Ingredient { name: "Kraken".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Rum".into()}], stock: 0 };
-        let simple_syrup = Ingredient { name: "Simple Syrup".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Sweet".into()},IngredientTag{ value: "Sugary".into()}], stock: 0};
-        let tonic = Ingredient { name: "Tonic water".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Fizzy".into()}], stock: 0};
-        let cola = Ingredient { name: "Coca-Cola".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Cola".into()}], stock: 0};
+        let gin = Ingredient { name: "Roku".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}], ..Default::default()};
+        let gin2 = Ingredient { name: "Virago".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Gin".into()}], ..Default::default()};
+        let rum = Ingredient { name: "Kraken".into(), quality: crate::ingredient::Quality::High, tags: vec![IngredientTag{ value: "Rum".into()}], ..Default::default()};
+        let simple_syrup = Ingredient { name: "Simple Syrup".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Sweet".into()},IngredientTag{ value: "Sugary".into()}], ..Default::default()};
+        let tonic = Ingredient { name: "Tonic water".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Fizzy".into()}], ..Default::default()};
+        let cola = Ingredient { name: "Coca-Cola".into(), quality: crate::ingredient::Quality::Any, tags: vec![IngredientTag{ value: "Cola".into()}], ..Default::default()};
         /*ingredient_store.borrow_mut().register(gin);
         ingredient_store.borrow_mut().register(gin2);
         ingredient_store.borrow_mut().register(rum);

@@ -39,7 +39,7 @@ pub struct IngredientTag {
     pub value: String
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Ingredient {
     pub name: String,
     pub quality: Quality,
@@ -59,17 +59,17 @@ mod test {
     fn test_selector_quality() {
         // Setup
         let mut store = IngredientStore::default();
-        let high_ingredient1 = Ingredient{ name: "high_1".into(), quality: Quality::High, tags: vec![], stock: 0 };
+        let high_ingredient1 = Ingredient{ name: "high_1".into(), quality: Quality::High, ..Default::default() };
         store.register(high_ingredient1);
-        let high_ingredient2 = Ingredient{ name: "high_2".into(), quality: Quality::High, tags: vec![], stock: 0 };
+        let high_ingredient2 = Ingredient{ name: "high_2".into(), quality: Quality::High, ..Default::default() };
         store.register(high_ingredient2);
-        let mid_ingredient1 = Ingredient{ name: "mid_1".into(), quality: Quality::Medium, tags: vec![], stock: 0 };
+        let mid_ingredient1 = Ingredient{ name: "mid_1".into(), quality: Quality::Medium, ..Default::default() };
         store.register(mid_ingredient1);
-        let mid_ingredient2 = Ingredient{ name: "mid_2".into(), quality: Quality::Medium, tags: vec![], stock: 0 };
+        let mid_ingredient2 = Ingredient{ name: "mid_2".into(), quality: Quality::Medium, ..Default::default() };
         store.register(mid_ingredient2);
-        let low_ingredient1 = Ingredient{ name: "low_1".into(), quality: Quality::Low, tags: vec![], stock: 0 };
+        let low_ingredient1 = Ingredient{ name: "low_1".into(), quality: Quality::Low, ..Default::default() };
         store.register(low_ingredient1);
-        let low_ingredient2 = Ingredient{ name: "low_2".into(), quality: Quality::Low, tags: vec![], stock: 0 };
+        let low_ingredient2 = Ingredient{ name: "low_2".into(), quality: Quality::Low, ..Default::default() };
         store.register(low_ingredient2);
 
 
@@ -89,14 +89,14 @@ mod test {
     #[test]
     fn test_selector_any_quality() {
         let mut store = IngredientStore::default();
-        let any = Ingredient{ name: "any".into(), quality: Quality::Any, tags:vec![], stock: 0};
+        let any = Ingredient{ name: "any".into(), quality: Quality::Any, ..Default::default()};
         store.register(any);
         for qual in vec![Some(Quality::Any), Some(Quality::High), Some(Quality::Medium), Some(Quality::Low), None] {
             let selector = IngredientSelector{name: None, quality: qual, tags: None, in_stock: None};
             let result = store.select(&selector);
             assert_eq!(result.len(), 1);
         }
-        let high = Ingredient{ name: "high".into(), quality: Quality::High, tags: vec![], stock: 0};
+        let high = Ingredient{ name: "high".into(), quality: Quality::High, ..Default::default()};
         store.register(high);
         for qual in vec![Some(Quality::Any), Some(Quality::High), None] {
             let selector = IngredientSelector{name: None, quality: qual, tags: None, in_stock: None};
@@ -109,9 +109,9 @@ mod test {
     fn test_selector_name() {
         // Setup
         let mut store = IngredientStore::default();
-        let dupe_1 = Ingredient{ name: "dupe".into(), quality: Quality::Low, tags: vec![], stock: 0};
-        let dupe_2 = Ingredient{ name: "dupe".into(), quality: Quality::High, tags: vec![], stock: 0};
-        let novel = Ingredient{ name: "novel".into(), quality: Quality::Any, tags: vec![], stock: 0};
+        let dupe_1 = Ingredient{ name: "dupe".into(), quality: Quality::Low, ..Default::default()};
+        let dupe_2 = Ingredient{ name: "dupe".into(), quality: Quality::High, ..Default::default()};
+        let novel = Ingredient{ name: "novel".into(), quality: Quality::Any, ..Default::default()};
         store.register(dupe_1);
         store.register(dupe_2);
         store.register(novel);

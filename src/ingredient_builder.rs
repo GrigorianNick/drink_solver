@@ -24,7 +24,7 @@ impl Into<Ingredient> for IngredientBuilder {
             name: self.name.clone(),
             quality: self.quality,
             tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect(),
-            stock: self.stock }
+            stock: self.stock}
     }
 }
 
@@ -40,6 +40,6 @@ impl Builder<Ingredient> for IngredientBuilder {
             name: self.name.clone(),
             quality: self.quality,
             tags: self.tags.iter().map(|t| IngredientTag { value: t.clone()}).collect(),
-            stock: self.stock }
+            stock: self.stock}
     }
 }

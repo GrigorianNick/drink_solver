@@ -10,7 +10,6 @@ pub struct RecipieWidget {
     selected_recipie: uuid::Uuid,
     old_selected_recipie: uuid::Uuid,
     component_widgets: Vec<ComponentWidget>,
-    selected: String,
     editing: bool,
     // Only show recipies we can make with our current stock
     show_in_stock: bool
@@ -19,7 +18,7 @@ pub struct RecipieWidget {
 
 impl RecipieWidget {
     pub fn new(recipie_store: Rc<RefCell<RecipieStore>>, ingredient_store: Rc<RefCell<IngredientStore>>) -> RecipieWidget {
-        RecipieWidget { recipie_store: recipie_store, ingredient_store: ingredient_store, selected_recipie: uuid::Uuid::nil(), old_selected_recipie: uuid::Uuid::nil(), component_widgets: vec![], selected: "".into(), editing: false, show_in_stock: false }
+        RecipieWidget { recipie_store: recipie_store, ingredient_store: ingredient_store, selected_recipie: uuid::Uuid::nil(), old_selected_recipie: uuid::Uuid::nil(), component_widgets: vec![], editing: false, show_in_stock: false }
     }
 
     pub fn handle_selection(&mut self) {
@@ -69,9 +68,9 @@ impl Widget for &mut RecipieWidget {
                 ui.vertical(|ui| {
                     ui.horizontal(|ui| {
                         ui.heading(recipie.name);
-                        if ui.add(Button::selectable(self.editing, "Edit")).clicked() {
+                        /*if ui.add(Button::selectable(self.editing, "Edit")).clicked() {
                             self.editing = !self.editing;
-                        }
+                        }*/
                     });
                     ui.separator();
                     ui.horizontal(|ui| {
@@ -87,8 +86,16 @@ impl Widget for &mut RecipieWidget {
                             }
                         });
                     });
-                    ui.separator();
-                    ui.label(recipie.notes);
+                    if !recipie.description.is_empty() {
+                        ui.separator();
+                        ui.label("Description:");
+                        ui.label(recipie.description);
+                    }
+                    if !recipie.notes.is_empty() {
+                        ui.separator();
+                        ui.label("Notes:");
+                        ui.label(recipie.notes);
+                    }
                 });
             }
         }).response
