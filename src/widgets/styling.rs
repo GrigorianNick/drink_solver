@@ -1,4 +1,4 @@
-use egui::{Color32, Stroke, Style, Theme};
+use egui::{Color32, Style, Theme};
 
 pub fn build_menu(ctx: &egui::Context, ui: &mut egui::Ui) -> egui::Response {
     ui.menu_button("Style", |ui| {
@@ -15,7 +15,8 @@ pub fn build_menu(ctx: &egui::Context, ui: &mut egui::Ui) -> egui::Response {
             ctx.set_theme(Theme::Dark);
             ctx.style_mut(set_neon);
         }
-    }).response
+    })
+    .response
 }
 
 fn set_neon(style: &mut Style) {

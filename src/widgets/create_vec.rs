@@ -2,10 +2,9 @@ use std::{marker::PhantomData, str::FromStr};
 
 use egui::{ComboBox, Widget};
 
-
 pub enum EntryConstraint<T> {
     Freeform,
-    Enumerated(Vec<T>, uuid::Uuid)
+    Enumerated(Vec<T>, uuid::Uuid),
 }
 
 pub trait CreateVecWidgetKernel<T: Default + egui::TextBuffer> {
@@ -16,12 +15,18 @@ pub trait CreateVecWidgetKernel<T: Default + egui::TextBuffer> {
 }
 
 #[derive(Default, Clone)]
-pub struct CreateVecWidget<T, Kernel> where T: Default + egui::TextBuffer, Kernel: CreateVecWidgetKernel<T> {
+pub struct CreateVecWidget<T, Kernel>
+where
+    T: Default + egui::TextBuffer,
+    Kernel: CreateVecWidgetKernel<T>,
+{
     kernel: Kernel,
-    phantom: PhantomData<T>
+    phantom: PhantomData<T>,
 }
 
-impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKernel<T>> CreateVecWidget<T, Kernel> {
+impl<T: Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKernel<T>>
+    CreateVecWidget<T, Kernel>
+{
     fn build_freeform(&mut self, ui: &mut egui::Ui) -> egui::Response {
         let mut to_remove = vec![];
         for (i, val) in self.kernel.get_entries_mut().iter_mut().enumerate() {
@@ -42,18 +47,25 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
         b
     }
 
-    fn build_enumerated(&mut self, ui: &mut egui::Ui, enums: &Vec<T>, id: impl std::hash::Hash) -> egui::Response {
+    fn build_enumerated(
+        &mut self,
+        ui: &mut egui::Ui,
+        enums: &Vec<T>,
+        id: impl std::hash::Hash,
+    ) -> egui::Response {
         if enums.is_empty() {
             return ui.label("No options provided!");
         }
         let mut to_remove = vec![];
         for (i, val) in self.kernel.get_entries_mut().iter_mut().enumerate() {
             ui.horizontal(|ui| {
-                ComboBox::from_id_salt((i, &id)).selected_text(val.as_str()).show_ui(ui, |ui| {
-                    for e in enums {
-                        ui.selectable_value(val, e.clone(), e.as_str());
-                    }
-                });
+                ComboBox::from_id_salt((i, &id))
+                    .selected_text(val.as_str())
+                    .show_ui(ui, |ui| {
+                        for e in enums {
+                            ui.selectable_value(val, e.clone(), e.as_str());
+                        }
+                    });
                 if ui.button("X").clicked() {
                     to_remove.push(i);
                 }
@@ -74,7 +86,10 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
     }
 
     pub fn new(kernel: Kernel) -> CreateVecWidget<T, Kernel> {
-        CreateVecWidget { kernel, phantom: PhantomData::default() }
+        CreateVecWidget {
+            kernel,
+            phantom: PhantomData::default(),
+        }
     }
 
     pub fn clear(&mut self) {
@@ -82,7 +97,9 @@ impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKe
     }
 }
 
-impl<T:Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKernel<T>> Widget for &mut CreateVecWidget<T, Kernel> {
+impl<T: Default + egui::TextBuffer + PartialEq + Clone, Kernel: CreateVecWidgetKernel<T>> Widget
+    for &mut CreateVecWidget<T, Kernel>
+{
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         match self.kernel.get_entry_constraint() {
             EntryConstraint::Freeform => self.build_freeform(ui),

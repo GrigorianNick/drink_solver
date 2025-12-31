@@ -1,38 +1,41 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 #![allow(rustdoc::missing_crate_level_docs)] // it's an example
 
+mod builder;
+mod component_builder;
 mod ingredient;
+mod ingredient_builder;
+mod ingredient_selector_builder;
+mod ingredient_store;
+mod measure;
 mod recipie;
 mod recipie_builder;
 mod recipie_store;
-mod widgets;
-mod ingredient_builder;
-mod builder;
 mod store;
-mod ingredient_store;
-mod ingredient_selector_builder;
-mod component_builder;
-mod measure;
+mod widgets;
 
-use eframe::egui;
-use egui::{Color32, IconData};
 use ::image::load_from_memory;
+use eframe::egui;
+use egui::IconData;
 
 fn main() -> eframe::Result {
     let icon_bytes = include_bytes!("../icon.png");
     let (rgba, width, height) = {
         let img = load_from_memory(icon_bytes).expect("Missing icon.png!");
-        (img.as_rgba8().expect("Cannot convert icon to rgba8!").to_vec(), img.width(), img.height())
+        (
+            img.as_rgba8()
+                .expect("Cannot convert icon to rgba8!")
+                .to_vec(),
+            img.width(),
+            img.height(),
+        )
     };
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_icon(std::sync::Arc::new(
-                IconData {
-                    rgba,
-                    width,
-                    height
-                }
-            )),
+        viewport: egui::ViewportBuilder::default().with_icon(std::sync::Arc::new(IconData {
+            rgba,
+            width,
+            height,
+        })),
         ..Default::default()
     };
     eframe::run_native(

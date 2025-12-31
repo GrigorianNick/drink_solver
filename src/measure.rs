@@ -11,7 +11,7 @@ pub enum Measure {
     Liter(f32),
     Handle(f32),
     #[default]
-    Taste
+    Taste,
 }
 
 impl fmt::Display for Measure {

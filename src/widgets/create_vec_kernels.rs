@@ -1,9 +1,8 @@
 use crate::widgets::create_vec::CreateVecWidgetKernel;
 
-
 #[derive(Default, Clone)]
 pub struct VecWidget {
-    entries: Vec<String>
+    entries: Vec<String>,
 }
 
 impl CreateVecWidgetKernel<String> for VecWidget {
@@ -14,7 +13,7 @@ impl CreateVecWidgetKernel<String> for VecWidget {
     fn get_entry_constraint(&self) -> super::create_vec::EntryConstraint<String> {
         super::create_vec::EntryConstraint::Freeform
     }
-    
+
     fn get_entries(&self) -> Vec<String> {
         self.entries.clone()
     }
@@ -28,12 +27,16 @@ impl CreateVecWidgetKernel<String> for VecWidget {
 pub struct VecEnumWidget {
     enums: Vec<String>,
     entries: Vec<String>,
-    id: uuid::Uuid
+    id: uuid::Uuid,
 }
 
 impl VecEnumWidget {
     pub fn new(enums: Vec<String>) -> VecEnumWidget {
-        VecEnumWidget { enums: enums, entries: vec![], id: uuid::Uuid::new_v4() }
+        VecEnumWidget {
+            enums: enums,
+            entries: vec![],
+            id: uuid::Uuid::new_v4(),
+        }
     }
 }
 

@@ -3,13 +3,23 @@ use std::{cell::RefCell, rc::Rc};
 use egui::{Button, CentralPanel, ComboBox, ScrollArea, TopBottomPanel, Widget};
 use strum::IntoEnumIterator;
 
-use crate::{builder::Builder, ingredient::Quality, ingredient_builder::IngredientBuilder, ingredient_store::IngredientStore, store::Store, widgets::{create_vec::{CreateVecWidget, CreateVecWidgetKernel}, create_vec_kernels::VecWidget}};
+use crate::{
+    builder::Builder,
+    ingredient::Quality,
+    ingredient_builder::IngredientBuilder,
+    ingredient_store::IngredientStore,
+    store::Store,
+    widgets::{
+        create_vec::{CreateVecWidget, CreateVecWidgetKernel},
+        create_vec_kernels::VecWidget,
+    },
+};
 
 #[derive(Default, Clone)]
-pub struct  CreateIngredientWidget {
+pub struct CreateIngredientWidget {
     builder: IngredientBuilder,
     tag_widget: CreateVecWidget<String, VecWidget>,
-    store: Rc<RefCell<IngredientStore>>
+    store: Rc<RefCell<IngredientStore>>,
 }
 
 impl CreateIngredientWidget {
@@ -17,7 +27,8 @@ impl CreateIngredientWidget {
         CreateIngredientWidget {
             builder: IngredientBuilder::default(),
             store: store,
-            tag_widget: CreateVecWidget::default(), }
+            tag_widget: CreateVecWidget::default(),
+        }
     }
 
     fn clear(&mut self) {
@@ -41,31 +52,35 @@ impl Widget for &mut CreateIngredientWidget {
                 }
             })
         });
-        CentralPanel::default().show_inside(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.label("Name");
-                    ui.text_edit_singleline(&mut self.builder.name)
+        CentralPanel::default()
+            .show_inside(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label("Name");
+                        ui.text_edit_singleline(&mut self.builder.name)
+                    });
+                    ui.separator();
+                    ui.vertical(|ui| {
+                        ui.label("Quality");
+                        ComboBox::from_id_salt("CreateIngredientWidgetQuaulity")
+                            .selected_text(self.builder.quality.to_string())
+                            .show_ui(ui, |ui| {
+                                for quality in Quality::iter() {
+                                    ui.selectable_value(
+                                        &mut self.builder.quality,
+                                        quality,
+                                        quality.to_string(),
+                                    );
+                                }
+                            })
+                    })
                 });
                 ui.separator();
-                ui.vertical(|ui| {
-                    ui.label("Quality");
-                    ComboBox::from_id_salt("CreateIngredientWidgetQuaulity")
-                        .selected_text(self.builder.quality.to_string())
-                        .show_ui(ui, |ui| {
-                        for quality in Quality::iter() {
-                            ui.selectable_value(&mut self.builder.quality,  quality, quality.to_string());
-                        }
-                    })
+                ui.label("Tags");
+                ScrollArea::vertical().show(ui, |ui| {
+                    ui.vertical(|ui| ui.add(&mut self.tag_widget)).response
                 })
-            });
-            ui.separator();
-            ui.label("Tags");
-            ScrollArea::vertical().show(ui, |ui| {
-                ui.vertical(|ui| {
-                    ui.add(&mut self.tag_widget)
-                }).response
             })
-        }).response
+            .response
     }
 }

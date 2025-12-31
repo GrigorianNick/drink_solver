@@ -1,4 +1,3 @@
-
 use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -8,7 +7,7 @@ use crate::{recipie::Recipie, store::Store};
 #[derive(Serialize, Deserialize, Default)]
 pub struct RecipieStore {
     recipies: HashMap<uuid::Uuid, Recipie>,
-    config: Option<PathBuf>
+    config: Option<PathBuf>,
 }
 
 impl RecipieStore {
@@ -23,7 +22,10 @@ impl RecipieStore {
     }*/
 
     pub fn get_recipie_entries(&self) -> Vec<(uuid::Uuid, Recipie)> {
-        self.recipies.iter().map(|(u, r)| (u.clone(), r.clone())).collect()
+        self.recipies
+            .iter()
+            .map(|(u, r)| (u.clone(), r.clone()))
+            .collect()
     }
 }
 
@@ -49,22 +51,22 @@ impl Store<Recipie> for RecipieStore {
     fn deregister(&mut self, id: uuid::Uuid) -> bool {
         self.recipies.remove(&id).is_some()
     }
-    
+
     fn get_entries(&self) -> Vec<Recipie> {
         self.recipies.values().cloned().collect()
     }
-    
+
     fn get_entries_mut(&mut self) -> Vec<&mut Recipie> {
         self.recipies.values_mut().collect()
     }
-    
+
     fn get_entry(&self, id: uuid::Uuid) -> Option<Recipie> {
         match self.recipies.get(&id) {
             Some(r) => Some(r.clone()),
             None => None,
         }
     }
-    
+
     fn get_entry_mut(&mut self, id: uuid::Uuid) -> Option<&mut Recipie> {
         self.recipies.get_mut(&id)
     }
@@ -72,8 +74,6 @@ impl Store<Recipie> for RecipieStore {
 
 #[cfg(test)]
 mod tests {
-    use crate::ingredient::Ingredient;
-
     use super::*;
 
     #[test]

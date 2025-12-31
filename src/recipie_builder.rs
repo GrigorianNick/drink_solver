@@ -1,5 +1,5 @@
-use crate::recipie::{Component, Recipie};
 use crate::builder::Builder;
+use crate::recipie::{Component, Recipie};
 
 #[derive(Clone, Default)]
 pub struct RecipieBuilder {
@@ -8,7 +8,7 @@ pub struct RecipieBuilder {
     pub short_description: String,
     pub notes: String,
     pub components: Vec<Component>,
-    pub instructions: Vec<String>
+    pub instructions: Vec<String>,
 }
 
 impl From<Recipie> for RecipieBuilder {
@@ -19,13 +19,12 @@ impl From<Recipie> for RecipieBuilder {
             short_description: value.short_description.clone(),
             notes: value.notes.clone(),
             components: value.components.clone(),
-            instructions: value.instructions.clone()
+            instructions: value.instructions.clone(),
         }
     }
 }
 
 impl Builder<Recipie> for RecipieBuilder {
-
     fn build(&self) -> Recipie {
         let mut recipie = Recipie::default();
         recipie.name = self.name.clone();
@@ -36,7 +35,7 @@ impl Builder<Recipie> for RecipieBuilder {
         recipie.instructions = self.instructions.clone();
         recipie
     }
-    
+
     fn clear(&mut self) {
         self.name.clear();
         self.description.clear();

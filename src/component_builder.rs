@@ -1,4 +1,7 @@
-use crate::{builder::Builder, ingredient_selector_builder::IngredientSelectorBuilder, measure::Measure, recipie::Component};
+use crate::{
+    builder::Builder, ingredient_selector_builder::IngredientSelectorBuilder, measure::Measure,
+    recipie::Component,
+};
 
 #[derive(Clone, Default)]
 pub struct ComponentBuilder {
@@ -14,7 +17,10 @@ pub struct ComponentBuilder {
 
 impl From<Component> for ComponentBuilder {
     fn from(value: Component) -> Self {
-        ComponentBuilder { selector: value.ingredient.into(), measure: value.amount.clone() }
+        ComponentBuilder {
+            selector: value.ingredient.into(),
+            measure: value.amount.clone(),
+        }
     }
 }
 
@@ -25,6 +31,9 @@ impl Builder<Component> for ComponentBuilder {
     }
 
     fn build(&self) -> Component {
-        Component { ingredient: self.selector.build(), amount: self.measure.clone() }
+        Component {
+            ingredient: self.selector.build(),
+            amount: self.measure.clone(),
+        }
     }
 }

@@ -5,7 +5,6 @@ use serde::{Serialize, de::DeserializeOwned};
 use crate::builder::Builder;
 
 pub trait Store<T>: Serialize + DeserializeOwned + Default {
-
     fn get_json_name() -> PathBuf;
 
     fn set_config_path(&mut self, path: PathBuf);
@@ -47,24 +46,23 @@ pub trait Store<T>: Serialize + DeserializeOwned + Default {
     fn new() -> Self {
         //let cfg_dir = dirs::config_local_dir().unwrap_or(PathBuf::from("."));
         let cfg_dir = PathBuf::from("./");
-        match Self::from_config(cfg_dir)
-        {
+        match Self::from_config(cfg_dir) {
             Ok(store) => store,
-            Err(_) => Self::default()
+            Err(_) => Self::default(),
         }
     }
 
     fn save(&self) -> bool {
         match self.get_config_path() {
             Some(path) => self.save_to(&path),
-            None => false
+            None => false,
         }
     }
 
     fn save_to(&self, path: &PathBuf) -> bool {
         match File::create(path) {
             Ok(file) => serde_json::to_writer(file, self).is_ok(),
-            _ => false
+            _ => false,
         }
     }
 }
