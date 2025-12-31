@@ -1,63 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egui::{Button, CentralPanel, ComboBox, Grid, Layout, ScrollArea, TopBottomPanel, Widget};
+use egui::{Button, CentralPanel, ComboBox, ScrollArea, TopBottomPanel, Widget};
 use strum::IntoEnumIterator;
 
-use crate::{builder::Builder, ingredient::Quality, ingredient_builder::IngredientBuilder, ingredient_store::IngredientStore, store::Store, widgets::create_vec::{CreateVecWidget, CreateVecWidgetKernel}};
-
-#[derive(Default, Clone)]
-pub struct VecWidget {
-    entries: Vec<String>
-}
-
-impl CreateVecWidgetKernel<String> for VecWidget {
-    fn get_entries_mut(&mut self) -> &mut Vec<String> {
-        &mut self.entries
-    }
-
-    fn get_entry_constraint(&self) -> super::create_vec::EntryConstraint<String> {
-        super::create_vec::EntryConstraint::Freeform
-    }
-    
-    fn get_entries(&self) -> Vec<String> {
-        self.entries.clone()
-    }
-
-    fn clear(&mut self) {
-        self.entries.clear();
-    }
-}
-
-#[derive(Default, Clone)]
-pub struct VecEnumWidget {
-    enums: Vec<String>,
-    entries: Vec<String>,
-    id: uuid::Uuid
-}
-
-impl VecEnumWidget {
-    pub fn new(enums: Vec<String>) -> VecEnumWidget {
-        VecEnumWidget { enums: enums, entries: vec![], id: uuid::Uuid::new_v4() }
-    }
-}
-
-impl CreateVecWidgetKernel<String> for VecEnumWidget {
-    fn get_entries(&self) -> Vec<String> {
-        self.entries.clone()
-    }
-
-    fn get_entries_mut(&mut self) -> &mut Vec<String> {
-        &mut self.entries
-    }
-
-    fn get_entry_constraint(&self) -> super::create_vec::EntryConstraint<String> {
-        super::create_vec::EntryConstraint::Enumerated(self.enums.clone(), self.id)
-    }
-
-    fn clear(&mut self) {
-        self.entries.clear();
-    }
-}
+use crate::{builder::Builder, ingredient::Quality, ingredient_builder::IngredientBuilder, ingredient_store::IngredientStore, store::Store, widgets::{create_vec::{CreateVecWidget, CreateVecWidgetKernel}, create_vec_kernels::VecWidget}};
 
 #[derive(Default, Clone)]
 pub struct  CreateIngredientWidget {

@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use egui::{Button, CentralPanel, Layout, ScrollArea, Separator, TopBottomPanel, Widget};
 
-use crate::{builder::Builder, ingredient_store::IngredientStore, recipie_builder::RecipieBuilder, recipie_store::RecipieStore, store::Store, widgets::{create_component::CreateComponentWidget, create_ingredient::VecWidget, create_vec::CreateVecWidget}};
+use crate::{builder::Builder, ingredient_store::IngredientStore, recipie_builder::RecipieBuilder, recipie_store::RecipieStore, store::Store, widgets::{create_component::CreateComponentWidget, create_vec::CreateVecWidget, create_vec_kernels::VecWidget}};
 
 #[derive(Clone)]
 pub struct CreateRecipieWidget {
