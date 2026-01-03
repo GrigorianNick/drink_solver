@@ -18,22 +18,27 @@ pub struct CreateComponentEntryWidget {
     builder: ComponentBuilder,
     tag_widget: CreateVecWidget<String, VecEnumWidget>,
     id: uuid::Uuid,
-    tags: Vec<String>
+    tags: Vec<String>,
+    names: Vec<String>
 }
 
 impl CreateComponentEntryWidget {
     pub fn new(store: Rc<RefCell<IngredientStore>>) -> CreateComponentEntryWidget {
-        let tags: Vec<String> = store
+        let mut tags: Vec<String> = store
             .borrow()
             .get_tags()
             .iter()
             .map(|t| t.value.clone())
             .collect();
+        tags.sort_by_key(|t| t.to_ascii_lowercase());
+        let mut names = store.borrow().get_ingredient_names();
+        names.sort_by_key(|n| n.to_ascii_lowercase());
         CreateComponentEntryWidget {
             builder: ComponentBuilder::default(),
             tag_widget: CreateVecWidget::new(VecEnumWidget::new(tags.clone())),
             id: uuid::Uuid::new_v4(),
             tags: tags,
+            names: names
         }
     }
 
@@ -63,7 +68,12 @@ impl Widget for &mut CreateComponentEntryWidget {
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
                 ui.label("Name");
-                ui.text_edit_singleline(&mut self.builder.selector.name);
+                ComboBox::from_id_salt(("Names", self.id)).selected_text(&self.builder.selector.name).show_ui(ui, |ui| {
+                    ui.selectable_value(&mut self.builder.selector.name, String::from(""), "");
+                    for name in &self.names {
+                        ui.selectable_value(&mut self.builder.selector.name, name.clone(), name);
+                    }
+                });
                 ui.label("Quality");
                 ComboBox::from_id_salt(("Quality", self.id))
                     .selected_text(
