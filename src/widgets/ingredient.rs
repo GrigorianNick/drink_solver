@@ -39,7 +39,7 @@ impl Widget for &mut IngredientWidget {
                             ui.selectable_value(
                                 &mut self.selected_ingredient,
                                 id,
-                                entry.name.clone(),
+                                &entry.name,
                             );
                             ui.horizontal(|ui| {
                                 if ui.add_enabled(entry.stock > 0, Button::new("-")).clicked() {
@@ -104,16 +104,13 @@ impl Widget for &mut IngredientWidget {
                                 });
                             ui.separator();
                             ui.add(&mut self.tag_editor);
-                            /*for tag in &ingredient.tags {
-                                ui.label(tag.value.clone());
-                            }*/
                         } else {
-                            ui.heading(ingredient.name.clone());
+                            ui.heading(&ingredient.name);
                             ui.separator();
                             ui.label(format!("Quality: {}", ingredient.quality.to_string()));
                             ui.separator();
                             for tag in &ingredient.tags {
-                                ui.label(tag.value.clone());
+                                ui.label(&tag.value);
                             }
                         }
                     });

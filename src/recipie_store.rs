@@ -11,16 +11,6 @@ pub struct RecipieStore {
 }
 
 impl RecipieStore {
-    // Tries to deserialize from a common json file, otherwise it only populates in memory
-    /*pub fn new() -> RecipieStore {
-        let cfg_dir = dirs::config_local_dir().unwrap_or(PathBuf::from("."));
-        match Self::from_config(cfg_dir)
-        {
-            Ok(store) => store,
-            Err(_) => RecipieStore::default()
-        }
-    }*/
-
     pub fn get_recipie_entries(&self) -> Vec<(uuid::Uuid, Recipie)> {
         self.recipies
             .iter()

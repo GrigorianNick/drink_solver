@@ -16,14 +16,14 @@ use crate::{
 #[derive(Clone, Default)]
 pub struct CreateComponentEntryWidget {
     builder: ComponentBuilder,
-    store: Rc<RefCell<IngredientStore>>,
     tag_widget: CreateVecWidget<String, VecEnumWidget>,
     id: uuid::Uuid,
+    tags: Vec<String>
 }
 
 impl CreateComponentEntryWidget {
     pub fn new(store: Rc<RefCell<IngredientStore>>) -> CreateComponentEntryWidget {
-        let tags = store
+        let tags: Vec<String> = store
             .borrow()
             .get_tags()
             .iter()
@@ -31,10 +31,17 @@ impl CreateComponentEntryWidget {
             .collect();
         CreateComponentEntryWidget {
             builder: ComponentBuilder::default(),
-            store,
-            tag_widget: CreateVecWidget::new(VecEnumWidget::new(tags)),
+            tag_widget: CreateVecWidget::new(VecEnumWidget::new(tags.clone())),
             id: uuid::Uuid::new_v4(),
+            tags: tags,
         }
+    }
+
+    pub fn set_component(&mut self, component: Component) {
+        self.builder = ComponentBuilder::from(component.clone());
+        self.tag_widget = CreateVecWidget::from(
+            VecEnumWidget::new(self.tags.clone()),
+            component.ingredient.tags.unwrap_or_default().into_iter().map(|s| s.value).collect());
     }
 
     pub fn build(&self) -> Component {
@@ -118,7 +125,6 @@ impl Widget for &mut CreateComponentEntryWidget {
 #[derive(Clone)]
 pub struct CreateComponentWidget {
     entries: Vec<CreateComponentEntryWidget>,
-    builders: Vec<ComponentBuilder>,
     store: Rc<RefCell<IngredientStore>>,
 }
 
@@ -126,7 +132,6 @@ impl CreateComponentWidget {
     pub fn new(store: Rc<RefCell<IngredientStore>>) -> CreateComponentWidget {
         CreateComponentWidget {
             entries: vec![],
-            builders: vec![],
             store: store,
         }
     }
@@ -138,6 +143,15 @@ impl CreateComponentWidget {
     pub fn clear(&mut self) {
         self.entries.clear()
     }
+
+    pub fn set_components(&mut self, components: Vec<Component>) {
+        self.clear();
+        for component in components {
+            let mut widget = CreateComponentEntryWidget::new(self.store.clone());
+            widget.set_component(component);
+            self.entries.push(widget);
+        }
+    }
 }
 
 impl Widget for &mut CreateComponentWidget {
@@ -146,7 +160,6 @@ impl Widget for &mut CreateComponentWidget {
         names.sort_by_key(|s| s.to_lowercase());
         let mut tags = self.store.borrow().get_tags();
         tags.sort_by_key(|t| t.value.to_lowercase());
-        //egui::ScrollArea::vertical().show(ui, |ui|{
         ui.vertical(|ui| {
             for entry in &mut self.entries {
                 ui.add(entry);
@@ -160,6 +173,5 @@ impl Widget for &mut CreateComponentWidget {
             resp
         })
         .response
-        //}).inner
     }
 }

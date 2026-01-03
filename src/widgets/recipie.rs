@@ -1,12 +1,12 @@
-use egui::{CentralPanel, SidePanel, Widget};
+use egui::{CentralPanel, ScrollArea, SidePanel, TopBottomPanel, Widget, style::ScrollAnimation};
 
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     ingredient_store::IngredientStore,
-    recipie::Component,
+    recipie::{self, Component},
     recipie_store::RecipieStore,
-    store::Store,
+    store::Store, widgets::{create_component::CreateComponentWidget, create_vec::{CreateVecWidget, CreateVecWidgetKernel}, create_vec_kernels::VecWidget},
 };
 
 pub struct RecipieWidget {
@@ -18,6 +18,8 @@ pub struct RecipieWidget {
     editing: bool,
     // Only show recipies we can make with our current stock
     show_in_stock: bool,
+    edit_instruction_widget: CreateVecWidget<String, VecWidget>,
+    edit_components_widget: CreateComponentWidget
 }
 
 impl RecipieWidget {
@@ -27,12 +29,14 @@ impl RecipieWidget {
     ) -> RecipieWidget {
         RecipieWidget {
             recipie_store: recipie_store,
-            ingredient_store: ingredient_store,
+            ingredient_store: ingredient_store.clone(),
             selected_recipie: uuid::Uuid::nil(),
             old_selected_recipie: uuid::Uuid::nil(),
             component_widgets: vec![],
             editing: false,
             show_in_stock: false,
+            edit_instruction_widget: CreateVecWidget::default(),
+            edit_components_widget: CreateComponentWidget::new(ingredient_store.clone())
         }
     }
 
@@ -90,42 +94,81 @@ impl Widget for &mut RecipieWidget {
             });
             self.handle_selection();
         });
+        if self.selected_recipie != uuid::Uuid::nil() {
+            TopBottomPanel::bottom(("recipie_bottom_panel")).show_inside(ui, |ui| {
+                ui.horizontal(|ui| {
+                    if ui.button("Delete entry").clicked() {
+                        self.recipie_store.borrow_mut().deregister(self.selected_recipie);
+                        self.selected_recipie = uuid::Uuid::nil();
+                    }
+                    if ui.toggle_value(&mut self.editing, "Edit recipie").clicked() {
+                        if self.editing && let Some(recipie) = self.recipie_store.borrow().get_entry(self.selected_recipie) {
+                            self.edit_instruction_widget = CreateVecWidget::from(VecWidget::default(), recipie.instructions);
+                            self.edit_components_widget.set_components(recipie.components);
+                        } else if let Some(recipie) = self.recipie_store.borrow_mut().get_entry_mut(self.selected_recipie) {
+                            recipie.instructions = self.edit_instruction_widget.get_entries();
+                            recipie.components = self.edit_components_widget.get_components();
+                        }
+                    }
+                })
+            });
+        }
         CentralPanel::default()
             .show_inside(ui, |ui| {
-                if let Some(recipie) = self.recipie_store.borrow().get_entry(self.selected_recipie)
+                if let Some(recipie) = self.recipie_store.borrow_mut().get_entry_mut(self.selected_recipie)
                 {
-                    ui.vertical(|ui| {
-                        ui.horizontal(|ui| {
-                            ui.heading(recipie.name);
-                            /*if ui.add(Button::selectable(self.editing, "Edit")).clicked() {
-                                self.editing = !self.editing;
-                            }*/
-                        });
-                        ui.separator();
-                        ui.horizontal(|ui| {
-                            ui.vertical(|ui| {
-                                for (i, step) in recipie.instructions.iter().enumerate() {
-                                    ui.label(format!("{}. {}", i + 1, step));
+                    ScrollArea::vertical().show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            if self.editing {
+                                ui.label("Name:");
+                                ui.text_edit_singleline(&mut recipie.name);
+                                ui.label("Short description:");
+                                ui.text_edit_singleline(&mut recipie.short_description);
+                                ui.separator();
+                                ui.horizontal(|ui| {
+                                    ui.vertical(|ui| {
+                                        ui.add(&mut self.edit_instruction_widget);
+                                    });
+                                    ui.separator();
+                                    ScrollArea::vertical().show(ui, |ui| {
+                                        ui.add(&mut self.edit_components_widget)
+                                    })
+                                });
+                                ui.separator();
+                                ui.label("Description:");
+                                ui.text_edit_multiline(&mut recipie.description);
+                                ui.separator();
+                                ui.label("Notes:");
+                                ui.text_edit_multiline(&mut recipie.notes);
+                            } else {
+                                ui.heading(&recipie.name);
+                                ui.separator();
+                                ui.horizontal(|ui| {
+                                    ui.vertical(|ui| {
+                                        for (i, step) in recipie.instructions.iter().enumerate() {
+                                            ui.label(format!("{}. {}", i + 1, step));
+                                        }
+                                    });
+                                    ui.separator();
+                                    ui.vertical(|ui| {
+                                        for widget in &mut self.component_widgets {
+                                            ui.add(widget);
+                                        }
+                                    });
+                                });
+                                if !recipie.description.is_empty() {
+                                    ui.separator();
+                                    ui.label("Description:");
+                                    ui.label(&recipie.description);
                                 }
-                            });
-                            ui.separator();
-                            ui.vertical(|ui| {
-                                for widget in &mut self.component_widgets {
-                                    ui.add(widget);
+                                if !recipie.notes.is_empty() {
+                                    ui.separator();
+                                    ui.label("Notes:");
+                                    ui.label(&recipie.notes);
                                 }
-                            });
+                            }
                         });
-                        if !recipie.description.is_empty() {
-                            ui.separator();
-                            ui.label("Description:");
-                            ui.label(recipie.description);
-                        }
-                        if !recipie.notes.is_empty() {
-                            ui.separator();
-                            ui.label("Notes:");
-                            ui.label(recipie.notes);
-                        }
-                    });
+                    }).inner
                 }
             })
             .response
