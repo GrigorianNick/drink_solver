@@ -47,6 +47,7 @@ pub struct Ingredient {
     pub quality: Quality,
     pub tags: Vec<IngredientTag>,
     pub stock: u16,
+    pub is_liquor: bool,
 }
 
 #[cfg(test)]
@@ -108,6 +109,7 @@ mod test {
                 quality: Some(qual),
                 tags: None,
                 in_stock: None,
+                is_liquor: None,
             };
             let result = store.select(&selector);
             assert_eq!(result.len(), 2);
@@ -119,6 +121,7 @@ mod test {
             quality: Some(Quality::Any),
             tags: None,
             in_stock: None,
+            is_liquor: None,
         };
         let result = store.select(&selector);
         assert_eq!(result.len(), 6);
@@ -145,6 +148,7 @@ mod test {
                 quality: qual,
                 tags: None,
                 in_stock: None,
+                is_liquor: None,
             };
             let result = store.select(&selector);
             assert_eq!(result.len(), 1);
@@ -161,6 +165,7 @@ mod test {
                 quality: qual,
                 tags: None,
                 in_stock: None,
+                is_liquor: None,
             };
             let result = store.select(&selector);
             assert_eq!(result.len(), 2);
@@ -196,6 +201,7 @@ mod test {
             quality: None,
             tags: None,
             in_stock: None,
+            is_liquor: None,
         };
         let dupe_result = store.select(&dupe_selector);
         assert_eq!(dupe_result.len(), 2);
@@ -204,6 +210,7 @@ mod test {
             quality: None,
             tags: None,
             in_stock: None,
+            is_liquor: None,
         };
         let novel_result = store.select(&novel_selector);
         assert_eq!(novel_result.len(), 1);
@@ -214,6 +221,7 @@ mod test {
             quality: None,
             tags: None,
             in_stock: None,
+            is_liquor: None,
         };
         let none_result = store.select(&none_selector);
         assert_eq!(none_result.len(), 3);
@@ -224,6 +232,7 @@ mod test {
             quality: None,
             tags: None,
             in_stock: None,
+            is_liquor: None,
         };
         let bad_result = store.select(&bad_selector);
         assert_eq!(bad_result.len(), 0);

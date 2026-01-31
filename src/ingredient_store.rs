@@ -17,6 +17,7 @@ pub struct IngredientSelector {
     pub quality: Option<Quality>,
     pub tags: Option<Vec<IngredientTag>>,
     pub in_stock: Option<bool>,
+    pub is_liquor: Option<bool>,
 }
 
 // A store of ingredients
@@ -108,6 +109,10 @@ impl IngredientStore {
                 Some(true) => i.stock > 0,
                 Some(false) => i.stock == 0,
                 None => true,
+            })
+            .filter(|i| match selector.is_liquor {
+                Some(l) => l == i.is_liquor,
+                None => true
             })
             .cloned()
             .collect()

@@ -1,11 +1,12 @@
 use std::{cell::RefCell, rc::Rc};
 
 use egui::{
-    Button, CentralPanel, ComboBox, DragValue, Grid, SidePanel, TopBottomPanel, Widget, special_emojis
+    Button, CentralPanel, ComboBox, DragValue, Grid, Response, SidePanel, TopBottomPanel, Ui, Widget, special_emojis
 };
 use strum::IntoEnumIterator;
+use uuid::Uuid;
 
-use crate::{ingredient::{IngredientTag, Quality}, ingredient_store::IngredientStore, store::Store, widgets::{create_vec::CreateVecWidget, create_vec_kernels::{VecEnumWidget, VecWidget}}};
+use crate::{ingredient::{Ingredient, IngredientTag, Quality}, ingredient_store::IngredientStore, store::Store, widgets::{create_vec::CreateVecWidget, create_vec_kernels::{VecEnumWidget, VecWidget}}};
 
 pub struct IngredientWidget {
     ingredient_store: Rc<RefCell<IngredientStore>>,
@@ -23,37 +24,50 @@ impl IngredientWidget {
             editing: false
         }
     }
+
+    pub fn show_list(&mut self, ui: &mut egui::Ui, is_liquor: bool) -> Response {
+        Grid::new(("ingredient_widget_sidepane_list", is_liquor))
+            .striped(true)
+            .show(ui, |ui| {
+                let mut binding = self.ingredient_store.borrow_mut();
+                let mut entries: Vec<(Uuid, &mut Ingredient)> = binding.get_ingredient_entries().into_iter().filter(|i| i.1.is_liquor == is_liquor).collect();
+                entries.sort_by_key(|e| e.1.name.to_lowercase());
+                for (id, entry) in entries {
+                    ui.selectable_value(
+                        &mut self.selected_ingredient,
+                        id,
+                        &entry.name,
+                    );
+                    ui.horizontal(|ui| {
+                        if ui.add_enabled(entry.stock > 0, Button::new("-")).clicked() {
+                            entry.stock -= 1;
+                        }
+                        ui.add(DragValue::new(&mut entry.stock));
+                        if ui.button("+").clicked() {
+                            entry.stock += 1;
+                        }
+                    });
+                    ui.end_row();
+                }
+            }).response
+    }
 }
 
 impl Widget for &mut IngredientWidget {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
         SidePanel::left("ingredient_side_panel_list").show_inside(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
-                Grid::new("ingredient_widget_sidepane_list")
-                    .striped(true)
-                    .show(ui, |ui| {
-                        let mut binding = self.ingredient_store.borrow_mut();
-                        let mut entries = binding.get_ingredient_entries();
-                        entries.sort_by_key(|e| e.1.name.to_lowercase());
-                        for (id, entry) in entries {
-                            ui.selectable_value(
-                                &mut self.selected_ingredient,
-                                id,
-                                &entry.name,
-                            );
-                            ui.horizontal(|ui| {
-                                if ui.add_enabled(entry.stock > 0, Button::new("-")).clicked() {
-                                    entry.stock -= 1;
-                                }
-                                ui.add(DragValue::new(&mut entry.stock));
-                                if ui.button("+").clicked() {
-                                    entry.stock += 1;
-                                }
-                            });
-                            ui.end_row();
-                        }
-                    })
-                    .response
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label("Mixers");
+                        self.show_list(ui, false)
+                    });
+                    ui.separator();
+                    ui.vertical(|ui| {
+                        ui.label("Liquor");
+                        self.show_list(ui, true)
+                    }).response
+                }).response
             })
         });
         if self.selected_ingredient != uuid::Uuid::nil() {

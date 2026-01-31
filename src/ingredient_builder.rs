@@ -9,6 +9,7 @@ pub struct IngredientBuilder {
     pub quality: Quality,
     pub tags: Vec<String>,
     pub stock: u16,
+    pub is_liquor: bool,
 }
 
 impl From<Ingredient> for IngredientBuilder {
@@ -18,6 +19,7 @@ impl From<Ingredient> for IngredientBuilder {
             quality: value.quality,
             tags: value.tags.iter().map(|t| t.value.clone()).collect(),
             stock: value.stock,
+            is_liquor: value.is_liquor, 
         }
     }
 }
@@ -33,6 +35,7 @@ impl Into<Ingredient> for IngredientBuilder {
                 .map(|t| IngredientTag { value: t.clone() })
                 .collect(),
             stock: self.stock,
+            is_liquor: self.is_liquor,
         }
     }
 }
@@ -54,6 +57,7 @@ impl Builder<Ingredient> for IngredientBuilder {
                 .map(|t| IngredientTag { value: t.clone() })
                 .collect(),
             stock: self.stock,
+            is_liquor: self.is_liquor,
         }
     }
 }
