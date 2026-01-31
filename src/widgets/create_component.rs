@@ -123,7 +123,19 @@ impl Widget for &mut CreateComponentEntryWidget {
                                 );
                             }
                         })
-                })
+                });
+                ui.label("Liquor/Mixer");
+                ComboBox::from_id_salt(("Is Liquor", self.id))
+                    .selected_text(match self.builder.selector.is_liquor {
+                        Some(true) => "Liquor",
+                        Some(false) => "Mixer",
+                        None => "Either"
+                    })
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut self.builder.selector.is_liquor, Some(true), "Liquor");
+                        ui.selectable_value(&mut self.builder.selector.is_liquor, Some(false), "Mixer");
+                        ui.selectable_value(&mut self.builder.selector.is_liquor, None, "Either");
+                    }).response
             });
             ui.separator();
             ui.vertical(|ui| ui.add(&mut self.tag_widget))
