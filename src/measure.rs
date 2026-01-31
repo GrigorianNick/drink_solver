@@ -10,6 +10,7 @@ pub enum Measure {
     Shot(f32),
     Liter(f32),
     Handle(f32),
+    Part(f32),
     #[default]
     Taste,
 }
@@ -22,6 +23,7 @@ impl fmt::Display for Measure {
             Measure::Shot(m) => write!(f, "{} shots", m),
             Measure::Liter(m) => write!(f, "{} liters", m),
             Measure::Handle(m) => write!(f, "{} handles", m),
+            Measure::Part(m) => write!(f, "{} parts", m),
             Measure::Taste => write!(f, "to taste"),
         }
     }
@@ -35,6 +37,7 @@ impl Measure {
             Measure::Shot(m) => Measure::Oz(1.5 * m),
             Measure::Liter(m) => Measure::Oz(33.814 * m),
             Measure::Handle(m) => Measure::Liter(1.5 * m).to_oz(),
+            Measure::Part(m) => Measure::Oz(m),
             Measure::Taste => Measure::Oz(0.1),
         }
     }

@@ -111,6 +111,9 @@ impl Widget for &mut CreateComponentEntryWidget {
                         Measure::Handle(val) => {
                             ui.add(DragValue::new(val).speed(0.1));
                         }
+                        Measure::Part(val) => {
+                            ui.add(DragValue::new(val).min_decimals(2).speed(0.25));
+                        }
                     };
                     ComboBox::from_id_salt(("Quantity", self.id))
                         .selected_text(self.builder.measure.to_string())
