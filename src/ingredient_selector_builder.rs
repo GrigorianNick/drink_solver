@@ -10,6 +10,7 @@ pub struct IngredientSelectorBuilder {
     pub quality: Option<Quality>,
     pub tags: Option<Vec<IngredientTag>>,
     pub in_stock: Option<bool>,
+    pub is_liquor: Option<bool>,
 }
 
 impl From<IngredientSelector> for IngredientSelectorBuilder {
@@ -19,6 +20,7 @@ impl From<IngredientSelector> for IngredientSelectorBuilder {
             quality: value.quality,
             tags: value.tags,
             in_stock: value.in_stock,
+            is_liquor: value.is_liquor,
         }
     }
 }
@@ -40,6 +42,7 @@ impl Builder<IngredientSelector> for IngredientSelectorBuilder {
             quality: self.quality,
             tags: self.tags.clone(),
             in_stock: self.in_stock,
+            is_liquor: self.is_liquor,
         }
     }
 }

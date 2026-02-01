@@ -13,6 +13,7 @@ pub enum Measure {
     Dash(f32),
     Teaspoon(f32),
     Tablespoon(f32),
+    Part(f32),
     #[default]
     Taste,
 }
@@ -28,6 +29,7 @@ impl fmt::Display for Measure {
             Measure::Dash(m) => write!(f, "{} dashes", m),
             Measure::Teaspoon(m) => write!(f, "{} teaspoons", m),
             Measure::Tablespoon(m) => write!(f, "{} tablespoons", m),
+            Measure::Part(m) => write!(f, "{} parts", m),
             Measure::Taste => write!(f, "to taste"),
         }
     }
@@ -44,6 +46,7 @@ impl Measure {
             Measure::Dash(m) => Measure::Oz(0.1),
             Measure::Teaspoon(m) => Measure::Ml(4.92892 * m).to_oz(),
             Measure::Tablespoon(m) => Measure::Teaspoon(3.0 * m).to_oz(),
+            Measure::Part(m) => Measure::Oz(m),
             Measure::Taste => Measure::Oz(0.1),
         }
     }

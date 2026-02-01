@@ -73,7 +73,9 @@ impl Widget for &mut CreateIngredientWidget {
                                     );
                                 }
                             })
-                    })
+                    });
+                    ui.separator();
+                    ui.checkbox(&mut self.builder.is_liquor, "Liquor")
                 });
                 ui.separator();
                 ui.label("Tags");
