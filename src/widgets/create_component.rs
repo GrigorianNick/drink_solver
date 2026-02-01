@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egui::{ComboBox, DragValue, Widget};
+use egui::{Align, ComboBox, DragValue, Layout, Widget};
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -110,6 +110,15 @@ impl Widget for &mut CreateComponentEntryWidget {
                         }
                         Measure::Handle(val) => {
                             ui.add(DragValue::new(val).speed(0.1));
+                        }
+                        Measure::Dash(val) => {
+                            ui.add(DragValue::new(val).speed(1));
+                        },
+                        Measure::Teaspoon(val) => {
+                            ui.add(DragValue::new(val).speed(0.25));
+                        }
+                        Measure::Tablespoon(val) => {
+                            ui.add(DragValue::new(val).speed(0.25));
                         }
                     };
                     ComboBox::from_id_salt(("Quantity", self.id))

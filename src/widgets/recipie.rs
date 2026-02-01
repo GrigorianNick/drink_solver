@@ -102,12 +102,17 @@ impl Widget for &mut RecipieWidget {
                         self.selected_recipie = uuid::Uuid::nil();
                     }
                     if ui.toggle_value(&mut self.editing, "Edit recipie").clicked() {
-                        if self.editing && let Some(recipie) = self.recipie_store.borrow().get_entry(self.selected_recipie) {
-                            self.edit_instruction_widget = CreateVecWidget::from(VecWidget::default(), recipie.instructions);
-                            self.edit_components_widget.set_components(recipie.components);
+                        if self.editing && let Some(recipie) = self.recipie_store.borrow_mut().get_entry_mut(self.selected_recipie) {
+                            self.edit_instruction_widget = CreateVecWidget::from(VecWidget::default(), recipie.instructions.clone());
+                            self.edit_components_widget.set_components(recipie.components.clone());
                         } else if let Some(recipie) = self.recipie_store.borrow_mut().get_entry_mut(self.selected_recipie) {
                             recipie.instructions = self.edit_instruction_widget.get_entries();
                             recipie.components = self.edit_components_widget.get_components();
+                            self.component_widgets = recipie
+                                .components
+                                .iter()
+                                .map(|c| return ComponentWidget::new(c.clone(), self.ingredient_store.clone()))
+                                .collect();
                         }
                     }
                 })

@@ -49,6 +49,8 @@ impl Widget for &mut CreateRecipieWidget {
                     self.builder.instructions = self.instruction_widget.get_entries();
                     self.builder.components = self.component_widget.get_components();
                     self.recipie_store.borrow_mut().build_from(&self.builder);
+                    self.instruction_widget.clear();
+                    self.component_widget.clear();
                     self.builder.clear();
                 }
                 let resp = ui.button("Reset");
