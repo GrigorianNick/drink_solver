@@ -47,6 +47,7 @@ pub struct Ingredient {
     pub quality: Quality,
     pub tags: Vec<IngredientTag>,
     pub stock: u16,
+    #[serde(default)]
     pub is_liquor: bool,
 }
 
